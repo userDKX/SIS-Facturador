@@ -1,80 +1,80 @@
-# Security Policy
+# Seguridad
 
-## Reporting a vulnerability
+## Reportar una vulnerabilidad
 
-If you discover a security vulnerability in **SIS Facturador**, please **do not
-open a public GitHub issue**. Instead, report it privately:
+Si encuentras una vulnerabilidad de seguridad en **SIS Facturador**, no abras
+un issue público. En su lugar:
 
-- Open a [private security advisory](https://github.com/dukex57/sis-facturador/security/advisories/new)
-  on this repository, or
-- Email the maintainer (contact in the GitHub profile).
+- Abre un [reporte privado de seguridad](https://github.com/dukex57/sis-facturador/security/advisories/new)
+  en este repo, o
+- Escríbele al mantenedor (contacto en el perfil de GitHub).
 
-We aim to acknowledge reports within 72 hours and to publish a fix or mitigation
-within 14 days for critical issues.
+La meta es responder en 72 horas y publicar un fix o mitigación dentro de 14
+días para issues críticos.
 
-Please include, when possible:
+Cuando puedas, incluye en el reporte:
 
-- Affected version (commit SHA or release tag).
-- Reproduction steps or proof of concept.
-- Impact assessment (what an attacker can do).
+- Versión afectada (commit SHA o tag).
+- Pasos para reproducir o PoC.
+- Impacto: qué puede hacer un atacante.
 
-## Supported versions
+## Versiones soportadas
 
-Until the project reaches `1.0.0`, only the latest minor release is supported.
+Hasta que el proyecto llegue a `1.0.0`, solo se soporta el último minor.
 
-| Version | Supported |
+| Versión | Soportada |
 |---------|-----------|
-| `0.1.x` | ✅        |
+| `0.1.x` | Sí        |
 
-## Sensitive material handling
+## Material sensible
 
-This project signs and submits real tax documents to SUNAT. The following items
-are sensitive and **must never** be committed, logged, or shared:
+Este proyecto firma y envía documentos tributarios reales a SUNAT. Lo que
+sigue **nunca** debe terminar en un commit, en un log, ni compartirse:
 
-| Item                          | Where it lives                         | Notes                                                |
-|-------------------------------|----------------------------------------|------------------------------------------------------|
-| Digital certificate `.pfx`    | `CERT_PFX_BASE64` env var (base64)     | Not on filesystem. Not in DB. Not in logs.           |
-| Certificate password          | `CERT_PASSWORD` env var                | Distinct from SOL password.                          |
-| SOL secondary-user password   | `SUNAT_PASSWORD` env var               | Rotate immediately if exposed.                       |
-| Database connection string    | `DATABASE_URL` env var                 | Use service role key only on the server.             |
-| Supabase service key          | `SUPABASE_SERVICE_KEY` env var         | Bypasses RLS — never expose to clients.              |
-| Signed `.xml` and CDR files   | `storage/` (gitignored)                | Contain real RUC, amounts, customer data.            |
+| Qué                              | Dónde vive                            | Notas                                                  |
+|----------------------------------|---------------------------------------|--------------------------------------------------------|
+| Certificado digital `.pfx`       | env var `CERT_PFX_BASE64` (base64)    | No en disco. No en BD. No en logs.                     |
+| Password del certificado         | env var `CERT_PASSWORD`               | Distinta de la clave SOL.                              |
+| Clave del usuario secundario SOL | env var `SUNAT_PASSWORD`              | Si se filtra, rotar de inmediato.                      |
+| Connection string de la BD       | env var `DATABASE_URL`                | El service key solo en el server, nunca en cliente.    |
+| Service key de Supabase          | env var `SUPABASE_SERVICE_KEY`        | Bypassa RLS — nunca exponerlo al cliente.              |
+| XMLs firmados y CDRs             | `storage/` (gitignored)               | Tienen RUCs, montos y datos del cliente reales.        |
 
-The repository's `.gitignore` already excludes `.env`, `*.pfx`, `*.p12`, `*.pem`,
-`*.key`, `*.crt`, and `storage/`. Verify with `git status` before any commit.
+El `.gitignore` del repo ya excluye `.env`, `*.pfx`, `*.p12`, `*.pem`,
+`*.key`, `*.crt` y `storage/`. Igual revisa con `git status` antes de
+commitear.
 
-## Incident response
+## Respuesta ante incidentes
 
-### Certificate compromise
+### Si el certificado se compromete
 
-If the `.pfx` is leaked or suspected compromised:
+1. Revoca el cert con la CA emisora (RENIEC para los certs ECEP-RENIEC),
+   ahora mismo.
+2. Genera uno nuevo y vuelve a registrarlo en SOL producción:
+   *Empresas → Comprobantes de Pago → SEE-DSC → Servicio de Envío de
+   Documentos Electrónicos → Registre aquí su certificado digital*.
+3. Actualiza `CERT_PFX_BASE64` y `CERT_PASSWORD` en cada deploy.
+4. Audita los últimos 30 días en *Consultar Envíos de CPE* por envíos que no
+   reconozcas.
 
-1. **Immediately** revoke it through the issuing CA (RENIEC for ECEP-RENIEC
-   certificates).
-2. Generate a new certificate and re-register it in SUNAT SOL (production):
-   *Empresas → Comprobantes de Pago → SEE-DSC → Servicio de Envío de Documentos
-   Electrónicos → Registre aquí su certificado digital*.
-3. Update `CERT_PFX_BASE64` and `CERT_PASSWORD` on every deploy.
-4. Audit the last 30 days of `Consultar Envíos de CPE` for any unrecognised
-   submissions.
+### Si la clave SOL se compromete
 
-### SOL password compromise
+1. Entra al SOL con el usuario primario y resetea la clave del secundario.
+2. Actualiza `SUNAT_PASSWORD` en cada deploy.
+3. Espera la propagación estándar de SUNAT (hasta 24 horas calendario) antes
+   de reanudar envíos por WS — antes de eso pueden venir `0102` o `0111`.
 
-1. Log into SOL with the primary user and reset the secondary-user password.
-2. Update `SUNAT_PASSWORD` on every deploy.
-3. Wait the standard SUNAT propagation window (up to 24h calendar) before
-   resuming WS submissions — premature attempts may return `0102`/`0111`.
+## Modelo de amenazas (deploy single-tenant en Vercel)
 
-## Threat model summary (single-tenant Vercel deployment)
-
-- **Public surface**: HTTPS endpoints exposed by Vercel; no auth on the API in
-  the current single-tenant model — assume the deployment is reachable only by
-  trusted callers (e.g., the SIS backend over an outbound firewall, or a VPN).
-- **Data at rest**: Supabase Postgres (managed, encrypted) + Supabase Storage
-  bucket with service-key-only access (RLS bypass).
-- **Data in transit**: TLS 1.2+ to Vercel; TLS 1.2+ to SUNAT WS.
-- **Secrets**: env vars on Vercel (encrypted at rest). The `.pfx` itself never
-  touches disk.
-- **Out of scope** for the current release: API-key authentication, per-tenant
-  isolation, audit logs, rate limiting. These are part of the planned
-  multi-tenant provider mode (see `docs/DEPLOY_PROVIDER.md` once published).
+- **Superficie pública**: endpoints HTTPS expuestos por Vercel; en el modelo
+  actual no hay auth en la API — asume que el deploy solo es alcanzable
+  desde callers de confianza (el backend del SIS por firewall de salida, o
+  una VPN).
+- **Datos en reposo**: Supabase Postgres (managed, encriptado) + bucket de
+  Supabase Storage con acceso solo por service key (bypass RLS).
+- **Datos en tránsito**: TLS 1.2+ a Vercel; TLS 1.2+ a SUNAT.
+- **Secretos**: env vars en Vercel (encriptados en reposo). El `.pfx` nunca
+  toca disco.
+- **Fuera de alcance** del release actual: auth por API key, isolation por
+  tenant, audit logs, rate limiting. Todo eso es parte del modo provider
+  multi-tenant (ver `docs/DEPLOY_PROVIDER.md`).

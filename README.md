@@ -1,228 +1,191 @@
 # SIS Facturador
 
-> **API REST de facturación electrónica SUNAT (Perú) en Python nativo —
-> validada en producción real.**
+API REST para facturar electrónicamente ante SUNAT (Perú), escrita en Python.
+Genera Factura (`01`) y Boleta (`03`) en UBL 2.1, las firma con XMLDSig
+RSA-SHA256, las manda por SOAP al webservice del contribuyente (SEE-DSC) y
+guarda el CDR aceptado.
 
-[![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
-[![Status](https://img.shields.io/badge/status-production-brightgreen.svg)](#production-validated)
-[![SUNAT](https://img.shields.io/badge/SUNAT-validated-success.svg)](#production-validated)
+Está corriendo en producción real desde el 2026-05-08.
 
-Genera Facturas (`01`) y Boletas (`03`) UBL 2.1, las firma con XMLDSig
-RSA-SHA256, las envía por SOAP al webservice del contribuyente (SEE-DSC) y
-persiste el CDR aceptado.
+## Por qué Python (y no otra cosa)
 
----
+Si has buscado cómo facturar a SUNAT desde código, ya te diste cuenta: casi
+todo lo que hay es PHP. Greenter, Mifact, q8factura, NubeFacT — todos viven en
+ese mundo. Para alguien que trabaja en Python (FastAPI, Django, data, ML), eso
+significa o usar un wrapper, o lanzar un subproceso PHP, o pelearte con la
+documentación traducida.
 
-## ¿Por qué Python?
+Este repo es la implementación nativa en Python del flujo entero: firma con
+`signxml`, UBL con `lxml` + `Jinja2`, SOAP con `zeep`, HTTP con `FastAPI` y
+Pydantic v2. No envuelve a Greenter ni porta su código — implementa el
+estándar de SUNAT directo.
 
-El ecosistema de facturación electrónica peruana está **dominado por
-PHP/Laravel** (Greenter, Mifact, q8factura, NubeFacT, Tumi-soft). Casi toda la
-documentación pública, las librerías y los foros están en PHP. Para un equipo
-que vive en el mundo Python — FastAPI, Django, data pipelines, ML — eso obliga
-a operar wrappers, sub-procesos PHP o re-implementar.
+## Lo que ya funciona en producción
 
-**SIS Facturador es Python nativo de extremo a extremo:**
+El 2026-05-08 se mandaron a `e-factura.sunat.gob.pe`:
 
-- `signxml` para la firma XMLDSig (no `phpseclib`)
-- `lxml` + `Jinja2` para UBL 2.1 (no `DOMDocument` de PHP)
-- `zeep` para el SOAP a SUNAT (no `SoapClient`)
-- `FastAPI` + `Pydantic v2` para la HTTP API (no Laravel)
+- Boleta `B001-1`: aceptada, code 0, ticket `202620668493873`
+- Factura `F001-1`: aceptada, code 0, ticket `202620668506859`
 
-No es un wrapper. Es la implementación end-to-end del estándar SUNAT en stack
-Python moderno. El objetivo es ser la **referencia abierta para devs Python
-peruanos** que hoy tienen que portar código de PHP.
-
----
-
-## Production-validated
-
-El pipeline emitió los siguientes comprobantes reales contra `e-factura.sunat.gob.pe`
-el **2026-05-08**:
-
-| Tipo    | Serie-Número | Status     | Code | Ticket SUNAT          |
-|---------|--------------|------------|------|------------------------|
-| Boleta  | `B001-1`     | `accepted` | `0`  | `202620668493873`     |
-| Factura | `F001-1`     | `accepted` | `0`  | `202620668506859`     |
-
-Ambos figuran como **Procesado** en el portal SOL del contribuyente bajo
-*Empresas → Comprobantes de pago → SEE - Del Contribuyente y Envío de Documentos
-→ Consultar Envíos de CPE*.
-
----
+Ambos figuran como **Procesado** en el portal SOL bajo
+*Empresas → Comprobantes de pago → SEE - Del Contribuyente y Envío de
+Documentos → Consultar Envíos de CPE*.
 
 ## Stack
 
-| Capa             | Tecnología                                    |
-|------------------|-----------------------------------------------|
-| HTTP API         | FastAPI 0.115 + Pydantic v2 + Uvicorn         |
-| UBL 2.1          | `lxml` 5.x + `Jinja2` 3.x                     |
-| Firma XMLDSig    | `signxml` 4.x + `cryptography` 44.x (RSA-SHA256, Exclusive C14N) |
-| SOAP a SUNAT     | `zeep` 4.x (WSDL bundlados localmente)        |
-| Persistencia     | Supabase Postgres (`SQLAlchemy 2.0` + `psycopg 3`) + Supabase Storage |
-| Hosting (default) | Vercel Hobby + Fluid Compute (300s)          |
+- FastAPI 0.115 + Pydantic v2 + Uvicorn
+- `lxml` + `Jinja2` para construir el UBL 2.1
+- `signxml` + `cryptography` para la firma XMLDSig (RSA-SHA256, Exclusive C14N)
+- `zeep` para el cliente SOAP (con WSDL bundleado local)
+- SQLAlchemy 2.0 + `psycopg` v3 sobre Postgres (Supabase free tier funciona)
+- Vercel Hobby + Fluid Compute (300s) en el modo single-tenant
 
----
-
-## Quick-start
+## Cómo correrlo en local (con cert de prueba MODDATOS)
 
 ```powershell
-# 1. Clonar
 git clone https://github.com/dukex57/sis-facturador.git
 cd sis-facturador
-
-# 2. Entorno virtual
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-
-# 3. Dependencias
 pip install -r requirements.txt
-
-# 4. Configurar envs (cert MODDATOS público de SUNAT para pruebas)
 Copy-Item .env.example .env
-# Editar .env si quieres usar tu cert real
-
-# 5. Correr
+# editas .env y pegas el CERT_PFX_BASE64
 uvicorn app.main:app --reload
 ```
 
-Healthcheck: `GET http://localhost:8000/v1/health`
-OpenAPI: `http://localhost:8000/docs`
+Health: `GET http://localhost:8000/v1/health`. Swagger: `http://localhost:8000/docs`.
 
----
+Detalle paso a paso (incluye la conversión del `.pfx` a base64 y el
+troubleshooting típico) en [`docs/INSTALL.md`](./docs/INSTALL.md).
 
-## Flujo
+## El flujo, en cinco cajas
 
 ```
-   POST /v1/invoices
-        │
-        ▼
-   schemas.InvoiceCreate  (Pydantic validation)
-        │
-        ▼
-   ubl.builder.build_invoice_xml   ──► UBL 2.1 sin firmar
-        │
-        ▼
-   signer.xmldsig.sign_invoice_xml ──► XML firmado (ds:Signature en
-        │                              cac:UBLExtensions/ExtensionContent)
-        ▼
-   sunat.packager.pack_invoice     ──► ZIP {ruc}-{tipo}-{serie}-{num}.zip
-        │
-        ▼
-   sunat.client.send_bill          ──► SOAP a e-factura.sunat.gob.pe
-        │
-        ▼
-   sunat.packager.unpack_cdr       ──► CDR XML (ResponseCode=0 si aceptado)
-        │
-        ▼
-   storage.upload_xml + .upload_cdr ──► Supabase Storage / filesystem
-        │
-        ▼
-   models.Invoice (insert)         ──► Postgres
+POST /v1/invoices
+      │
+      ▼
+schemas.InvoiceCreate          (validación Pydantic)
+      ▼
+ubl.builder.build_invoice_xml  (UBL 2.1 sin firmar)
+      ▼
+signer.xmldsig.sign_invoice_xml  (XMLDSig embebido en
+      │                           cac:UBLExtensions/.../ExtensionContent)
+      ▼
+sunat.packager.pack_invoice    (ZIP {ruc}-{tipo}-{serie}-{nro}.zip)
+      ▼
+sunat.client.send_bill         (SOAP a SUNAT, parsea CDR, devuelve resultado)
 ```
 
----
+## Modos de despliegue
 
-## Modos de deploy
+Hay dos, que conviven en el mismo codebase (regla "cero ramas por modo": todo
+configurable por envs, nunca por `if` en el código):
 
-| Modo                         | Estado          | Hosting target          | Casos de uso                                  |
-|------------------------------|-----------------|-------------------------|-----------------------------------------------|
-| **Single-tenant Vercel**     | ✅ Implementado | Vercel Hobby + Supabase | 1 cliente = 1 deploy. Comercio individual, freelancer. |
-| **Multi-tenant Provider K8s**| 📋 Doc conceptual | GKE / EKS / DOKS       | SaaS provider, holding con N RUCs, contadores. |
-
-El código actual cubre el modo single-tenant. La arquitectura del modo provider
-está documentada conceptualmente en `docs/DEPLOY_PROVIDER.md` (a publicar) e
-incluirá auth por API key, RLS por tenant, vault para certificados, rate
-limiting con Redis y observability stack — todo activable por env vars sin
-ramificar el código (regla *cero ramas por modo*).
-
----
+- **Single-tenant en Vercel.** 1 cliente = 1 deploy. Es lo que está
+  implementado y validado. Sirve para un comercio individual, un freelancer,
+  alguien que solo factura para su propia empresa. Costo: Vercel Hobby gratis
+  + Supabase free.
+- **Multi-tenant provider en Kubernetes.** Para una empresa que quiere ser
+  proveedora de facturación a varios RUCs (un holding, un contador, un SaaS).
+  Por ahora solo existe la arquitectura conceptual en
+  [`docs/DEPLOY_PROVIDER.md`](./docs/DEPLOY_PROVIDER.md) — no hay código aún.
+  Agrega auth por API key, RLS por tenant, vault para los `.pfx`, rate limit
+  y stack de observabilidad.
 
 ## Para empezar
 
-> Los enlaces a `docs/` se publicarán en la siguiente fase del repo. Por ahora
-> el quick-start de arriba es suficiente para correr local con cert MODDATOS.
-
-- 📦 `docs/INSTALL.md` — instalación técnica paso a paso (clonar, venv, cert, primer test).
-- 🏛️ `docs/SUNAT_SETUP.md` — onboarding operativo SUNAT (crear secundario, marcar permisos exactos, registrar cert, esperar 24h).
-- 🔐 `docs/SIGNING.md` — showcase técnico de la firma XMLDSig (XAdES vs XMLDSig puro, ubicación de `ds:Signature`, gotchas).
+- [`docs/INSTALL.md`](./docs/INSTALL.md) — instalar y correr local en 10
+  minutos, con cert de prueba.
+- [`docs/SUNAT_SETUP.md`](./docs/SUNAT_SETUP.md) — onboarding del titular del
+  RUC en producción: crear el usuario secundario, marcar los permisos
+  exactos, registrar el certificado, esperar las 24 horas.
+- [`docs/SIGNING.md`](./docs/SIGNING.md) — el lado técnico de la firma:
+  XMLDSig vs XAdES, dónde tiene que ir el `<ds:Signature>`, los gotchas que
+  cuestan horas si no los conoces.
 
 ## Documentación completa
 
-- `docs/ARCHITECTURE.md` — capas y diagrama Mermaid.
-- `docs/UBL.md` — UBL 2.1 aplicado a SUNAT (catálogos, atributos obligatorios).
-- `docs/SUNAT.md` — protocolo SOAP, errores, marco normativo 2024-2026.
-- `docs/DEPLOY_VERCEL.md` — deploy single-tenant en Vercel + Supabase.
-- `docs/DEPLOY_PROVIDER.md` — arquitectura conceptual multi-tenant en Kubernetes.
-- `docs/API.md` — referencia copy-paste de endpoints.
-- `docs/TROUBLESHOOTING.md` — runbook end-to-end por código de error.
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — capas y diagrama del
+  código.
+- [`docs/UBL.md`](./docs/UBL.md) — los detalles de UBL 2.1 que SUNAT valida.
+- [`docs/SUNAT.md`](./docs/SUNAT.md) — protocolo SOAP, errores frecuentes,
+  marco normativo 2024-2026.
+- [`docs/DEPLOY_VERCEL.md`](./docs/DEPLOY_VERCEL.md) — desplegar el modo
+  single-tenant.
+- [`docs/DEPLOY_PROVIDER.md`](./docs/DEPLOY_PROVIDER.md) — arquitectura del
+  modo multi-tenant en Kubernetes (conceptual).
+- [`docs/TROUBLESHOOTING.md`](./docs/TROUBLESHOOTING.md) — qué hacer cuando
+  SUNAT te devuelve un código que no entiendes.
 
----
+## Errores SUNAT más frecuentes
 
-## Errores SUNAT comunes
+| Código | Qué significa                                                | Qué hacer                                                |
+|--------|--------------------------------------------------------------|----------------------------------------------------------|
+| `0102` | Usuario o contraseña SOL inválidos                           | Revisa `SUNAT_USER` (el código le antepone el RUC).      |
+| `0111` | Tu secundario no tiene perfil para emitir vía WS             | Espera 24 horas calendario después del último Grabar.    |
+| `2800` | DNI como receptor en factura tipo 01                         | Usa RUC, o emite como boleta tipo 03.                    |
+| `3244` | Falta `cac:PaymentTerms` después de `AccountingCustomerParty`| Bug del template UBL.                                    |
+| `4242` | `AddressTypeCode` con ubigeo en lugar del código de local    | Usa `"0000"` para sede principal.                        |
 
-| Code  | Causa típica                                          | Acción                                                   |
-|-------|-------------------------------------------------------|----------------------------------------------------------|
-| `0102`| Credenciales SOL inválidas                            | Verificar `SUNAT_USER` con sufijo `<RUC><USER>`.         |
-| `0111`| Cache 24h post-Grabar permisos del secundario SOL     | Esperar 24h calendario. No es bug del código.            |
-| `2800`| DNI como receptor en factura tipo 01                  | Usar RUC, o emitir como boleta tipo 03.                  |
-| `3244`| Falta `cac:PaymentTerms` post `AccountingCustomerParty` | Verificar template UBL.                                |
-| `4242`| `AddressTypeCode` con ubigeo en lugar de `"0000"`     | Usar el código de establecimiento, no ubigeo.            |
-
-Detalle completo en `docs/SUNAT.md` + `docs/TROUBLESHOOTING.md`.
-
----
+Detalle de cada uno en [`docs/SUNAT.md`](./docs/SUNAT.md) y
+[`docs/TROUBLESHOOTING.md`](./docs/TROUBLESHOOTING.md).
 
 ## Roadmap
 
-- [x] Factura tipo `01` end-to-end (validada en prod).
-- [x] Boleta tipo `03` end-to-end (validada en prod).
-- [ ] Nota de Crédito (`07`).
-- [ ] Nota de Débito (`08`).
-- [ ] Comunicación de baja (sendSummary async + Vercel Cron).
-- [ ] Resumen diario de boletas.
-- [ ] PDF con QR (WeasyPrint).
-- [ ] Auth por API key (multi-tenant prep).
-- [ ] Soporte OSE (operador de servicios electrónicos).
-- [ ] Guía de Remisión (otro WSDL).
-- [ ] Implementación del modo provider multi-tenant en K8s.
+Ya hecho:
 
----
+- Factura tipo `01` end-to-end (validada en prod)
+- Boleta tipo `03` end-to-end (validada en prod)
 
-## Estructura
+Por hacer:
+
+- Nota de Crédito (`07`)
+- Nota de Débito (`08`)
+- Comunicación de baja (sendSummary async + Vercel Cron)
+- Resumen diario de boletas
+- PDF con QR (WeasyPrint)
+- Auth por API key (preparación multi-tenant)
+- Soporte OSE (operador de servicios electrónicos)
+- Guía de Remisión (otro WSDL)
+- Implementación del modo provider en K8s
+
+## Estructura del repo
 
 ```
-api/index.py              entry-point Vercel
+api/index.py          entry-point para Vercel
 app/
-  main.py                 FastAPI app + middleware + healthcheck
-  config.py               pydantic-settings (envs)
-  database.py             SQLAlchemy + psycopg v3
-  security/               cert .pfx loader (base64)
-  storage/                local + Supabase Storage adapters
-  ubl/                    UBL 2.1 generator + Jinja2 templates
-  signer/                 XMLDSig RSA-SHA256
-  sunat/                  zeep SOAP client + WSDLs bundlados
-  models/                 SQLAlchemy ORM
-  schemas/                Pydantic v2
-  services/               orquestación
-  routers/                endpoints REST
-scripts/                  bootstrap_db, verify_cert, sendbill_{beta,prod,prod_boleta}
-migrations/               SQL plano para Supabase SQL editor
-tests/                    unit + integration + e2e (markers: beta)
+  main.py             FastAPI + middleware + healthcheck
+  config.py           pydantic-settings (lee .env)
+  database.py         SQLAlchemy + psycopg v3
+  security/           carga del cert .pfx desde base64
+  storage/            adaptadores local + Supabase Storage
+  ubl/                generación UBL 2.1 (Jinja2 + lxml)
+  signer/             firma XMLDSig RSA-SHA256
+  sunat/              cliente zeep + WSDLs bundleados
+  models/             ORM SQLAlchemy
+  schemas/            Pydantic v2
+  services/           orquestación
+  routers/            endpoints REST
+scripts/              bootstrap_db, verify_cert, sendbill_*
+migrations/           SQL plano para Supabase
+tests/                unit + integration + e2e (marker: beta)
 ```
 
----
+## Contribuir
 
-## Acerca de
+Si encuentras un bug, una observación INFO de SUNAT que no documentamos, o
+quieres agregar Notas de Crédito antes que yo — abre un issue o un PR. La
+gente que más puede ayudar es quien ya peleó con esto antes y se acuerda de
+los detalles raros del SOL.
 
-Construido por **Luis Luza M.** ([@dukex57](https://github.com/dukex57)) en Lima,
-Perú. Producto en producción real para clientes del sistema SIS y proyecto
-abierto de portafolio.
+## Quién mantiene esto
 
-Si te ayudó o quieres adaptarlo para tu negocio, dale ⭐ y abre un Issue para
-preguntas concretas. Pull requests bienvenidos.
+Construido por **Luis Luza M.** ([@dukex57](https://github.com/dukex57)) en
+Lima. Lo uso en producción para clientes del sistema SIS y lo dejo abierto
+para que cualquier dev peruano que esté empezando con SUNAT en Python tenga
+una referencia que funcione.
 
 ## Licencia
 
-[MIT](./LICENSE) © 2026 Luis Luza M.
+[MIT](./LICENSE) — usa, modifica, vende, distribuye, lo que necesites.
+Atribución agradecida pero no exigida más allá del aviso de copyright.
