@@ -113,17 +113,29 @@ tests. Si toca un endpoint, agrega tests e2e en `tests/e2e/`.
 
 (Roadmap incluye NC `07`, ND `08`, comunicación de baja, resumen diario.)
 
-Cosas a tocar como mínimo:
+Cosas a tocar como mínimo. Importante: separar lo que es lógica del estándar
+SUNAT (va al SDK `pe_invoicing`) de lo que es del servicio HTTP (va a
+`sis_facturador`).
 
-- `app/ubl/templates/` — plantilla nueva (si la estructura difiere de
-  Invoice 2.1, ej. CreditNote 2.1)
-- `app/ubl/builder.py` — función `build_*_xml`
-- `app/ubl/models.py` — dataclass nuevo
-- `app/schemas/` — Pydantic schemas
-- `app/services/` — orquestador (si difiere de `create_and_send`)
-- `app/routers/` — endpoint nuevo
-- `app/models/` — tabla nueva (con migration en `migrations/`)
-- `tests/unit/test_*_builder.py` — tests del builder nuevo
+En el **SDK** (`packages/core/src/pe_invoicing/`):
+
+- `ubl/templates/` — plantilla nueva (si la estructura difiere de Invoice
+  2.1, ej. CreditNote 2.1)
+- `ubl/builder.py` — función `build_*_xml` nueva
+- `ubl/models.py` — dataclass nuevo
+- `__init__.py` — re-export del nuevo símbolo
+
+En el **microservicio** (`packages/api/src/sis_facturador/`):
+
+- `schemas/` — Pydantic schemas del request/response
+- `services/` — orquestador (si difiere de `create_and_send`)
+- `routers/` — endpoint nuevo
+- `models/` — tabla nueva (con migration en `migrations/`)
+
+Y además:
+
+- `packages/core/tests/unit/test_*_builder.py` — tests unit del builder
+- `packages/api/tests/e2e/` — tests e2e del endpoint
 - `examples/` — payload de ejemplo
 - `docs/UBL.md` — sección sobre el nuevo comprobante
 - `docs/API.md` — endpoint documentado

@@ -15,12 +15,12 @@ como "Procesado" en el portal SOL del contribuyente.
 ### Agregado
 
 - API HTTP con `POST /v1/invoices` y `GET /v1/invoices/{id}`.
-- Generación UBL 2.1 con plantilla Jinja2 (`app/ubl/builder.py`), incluyendo
+- Generación UBL 2.1 con plantilla Jinja2 (`pe_invoicing/ubl/builder.py`), incluyendo
   conversor de números a letras en español y cálculo de IGV al 18%.
-- Firma XMLDSig RSA-SHA256 con Exclusive C14N (`app/signer/xmldsig.py`); el
+- Firma XMLDSig RSA-SHA256 con Exclusive C14N (`pe_invoicing/signer/xmldsig.py`); el
   elemento `ds:Signature` se reubica dentro de
   `cac:UBLExtensions/cac:UBLExtension/cac:ExtensionContent` como exige SUNAT.
-- Cliente SOAP `sendBill` sobre `zeep` (`app/sunat/client.py`), con WSDLs
+- Cliente SOAP `sendBill` sobre `zeep` (`pe_invoicing/sunat/client.py`), con WSDLs
   bundleados localmente para beta y prod (evita el rate-limit de SUNAT en
   `?ns1.wsdl`).
 - `tipo_documento` parametrizable en `InvoiceInput` (default `"01"`); permite

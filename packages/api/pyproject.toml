@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sis-facturador"
+version = "0.1.0"
+description = "Microservicio HTTP que envuelve pe-invoicing y agrega persistencia, storage y deploy en Vercel."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Luis Luza M.", email = "noreply@userdkx.dev" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+    "Natural Language :: Spanish",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "pe-invoicing",
+    "fastapi>=0.115,<1",
+    "pydantic>=2.10,<3",
+    "pydantic-settings>=2.7,<3",
+    "sqlalchemy>=2.0,<3",
+    "psycopg[binary]>=3.2,<4",
+    "supabase>=2.11,<3",
+    "httpx>=0.28,<1",
+]
+
+[project.urls]
+Homepage = "https://github.com/userDKX/SIS-Facturador"
+Repository = "https://github.com/userDKX/SIS-Facturador"
+Issues = "https://github.com/userDKX/SIS-Facturador/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -56,7 +56,7 @@ python -m venv .venv
 pip install -r requirements.txt
 Copy-Item .env.example .env
 # editas .env y pegas el CERT_PFX_BASE64
-uvicorn app.main:app --reload
+uvicorn sis_facturador.main:app --reload
 ```
 
 Health: `GET http://localhost:8000/v1/health`. Swagger: `http://localhost:8000/docs`.
@@ -157,25 +157,41 @@ Por hacer:
 
 ## Estructura del repo
 
+El repo es un workspace con dos paquetes:
+
 ```
-api/index.py          entry-point para Vercel
-app/
-  main.py             FastAPI + middleware + healthcheck
-  config.py           pydantic-settings (lee .env)
-  database.py         SQLAlchemy + psycopg v3
-  security/           carga del cert .pfx desde base64
-  storage/            adaptadores local + Supabase Storage
-  ubl/                generación UBL 2.1 (Jinja2 + lxml)
-  signer/             firma XMLDSig RSA-SHA256
-  sunat/              cliente zeep + WSDLs bundleados
-  models/             ORM SQLAlchemy
-  schemas/            Pydantic v2
-  services/           orquestación
-  routers/            endpoints REST
-scripts/              bootstrap_db, verify_cert, sendbill_*
-migrations/           SQL plano para Supabase
-tests/                unit + integration + e2e (marker: beta)
+packages/
+├── core/                       pe-invoicing (SDK, publicable a PyPI)
+│   ├── pyproject.toml
+│   └── src/pe_invoicing/
+│       ├── ubl/                generación UBL 2.1 (Jinja2 + lxml)
+│       ├── signer/             firma XMLDSig RSA-SHA256
+│       ├── sunat/              cliente zeep + WSDLs bundleados
+│       └── security/           carga del cert .pfx desde base64
+└── api/                        sis-facturador (microservicio HTTP)
+    ├── pyproject.toml          depende de pe-invoicing
+    └── src/sis_facturador/
+        ├── main.py             FastAPI + middleware + healthcheck
+        ├── config.py           pydantic-settings (lee .env)
+        ├── database.py         SQLAlchemy + psycopg v3
+        ├── sunat_runtime.py    wrappers cacheados del SDK
+        ├── storage/            adaptadores local + Supabase Storage
+        ├── models/             ORM SQLAlchemy
+        ├── schemas/            Pydantic v2
+        ├── services/           orquestación
+        └── routers/            endpoints REST
+
+api/index.py                    entry-point para Vercel (importa sis_facturador)
+scripts/                        bootstrap_db, verify_cert, sendbill_*
+migrations/                     SQL plano para Supabase
+docs/                           documentación
+examples/                       payloads y curl listos para usar
 ```
+
+**El SDK** (`packages/core`) no toca FastAPI ni la BD — es una librería pura
+que cualquier dev Python puede `pip install pe-invoicing` y usar desde su
+propia app. **El microservicio** (`packages/api`) es un wrapper delgado
+encima del SDK: agrega HTTP, persistencia, storage y deploy.
 
 ## Contribuir
 

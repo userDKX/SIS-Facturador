@@ -5,7 +5,7 @@ documentos de negocio. SUNAT usa el subset UBL 2.1 con sus propias
 restricciones y extensiones. Este doc cubre los detalles que SUNAT valida
 con dureza — los que si los pifeas, te tira un código de error.
 
-La plantilla está en `app/ubl/templates/invoice_01.xml.j2`. Una sola para
+La plantilla está en `pe_invoicing/ubl/templates/invoice_01.xml.j2`. Una sola para
 factura (`01`) y boleta (`03`); el `tipo_documento` se interpola en el
 `InvoiceTypeCode`.
 
@@ -71,7 +71,7 @@ El `languageLocaleID="1000"` corresponde al Catálogo 7 código `1000`
 Sin esto, código `2624` o similar.
 
 El builder calcula el monto en letras con `monto_en_letras()` en
-`app/ubl/builder.py` — convierte un Decimal a su representación en español
+`pe_invoicing/ubl/builder.py` — convierte un Decimal a su representación en español
 peruano ("SON ... CON XX/100 SOLES").
 
 ### `AddressTypeCode` — el infame INFO 4242
@@ -197,7 +197,7 @@ El primero apunta al segundo via el atributo `URI` en
 
 ## El builder, la decisión clave
 
-`app/ubl/builder.py` tiene una sola función pública: `build_invoice_xml(inv:
+`pe_invoicing/ubl/builder.py` tiene una sola función pública: `build_invoice_xml(inv:
 InvoiceInput) -> str`. Toda la lógica vive ahí. Decisiones explícitas:
 
 - **`Decimal` para todos los montos.** No `float`. SUNAT redondea con
@@ -214,5 +214,5 @@ InvoiceInput) -> str`. Toda la lógica vive ahí. Decisiones explícitas:
 ## Para ver más
 
 - Catálogos de SUNAT: https://cpe.sunat.gob.pe/sites/default/files/inline-files/anexoVIII.pdf
-- Plantilla del builder: `app/ubl/templates/invoice_01.xml.j2`
+- Plantilla del builder: `pe_invoicing/ubl/templates/invoice_01.xml.j2`
 - Validador online de SUNAT (útil para depurar): https://e-factura.sunat.gob.pe/cl-ti-itcpfegem-beta/billService

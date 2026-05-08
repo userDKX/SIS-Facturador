@@ -1,7 +1,7 @@
 # Referencia HTTP
 
 Endpoints del SIS Facturador. Esto es referencia copy-paste — los detalles
-de cada campo viven en `app/schemas/invoice.py` y se renderan automáticos
+de cada campo viven en `sis_facturador/schemas/invoice.py` y se renderan automáticos
 en `/docs` cuando levantas el server (`make run`).
 
 Base URL: en local `http://localhost:8000`. En el deploy de Vercel,

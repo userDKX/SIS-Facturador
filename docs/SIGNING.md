@@ -2,7 +2,7 @@
 
 Este es el lado del proyecto que más cuesta entender bien y donde más cosas
 sutiles te pueden tirar el envío con un error que no dice nada útil. Vale la
-pena leerlo entero antes de tocar `app/signer/xmldsig.py`.
+pena leerlo entero antes de tocar `pe_invoicing/signer/xmldsig.py`.
 
 ## Contexto: XMLDSig vs XAdES-BES
 
@@ -84,7 +84,7 @@ SUNAT rechaza eso. Exige que la firma viva específicamente acá:
 </Invoice>
 ```
 
-La solución que aplica `app/signer/xmldsig.py`: firmar normal (signxml deja
+La solución que aplica `pe_invoicing/signer/xmldsig.py`: firmar normal (signxml deja
 la firma fuera), después usar `lxml` para mover el elemento al lugar
 correcto. La transform `enveloped-signature` hace que el digest se haya
 calculado sin contar la firma misma, así que mover el `ds:Signature` no

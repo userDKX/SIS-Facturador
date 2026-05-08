@@ -1,31 +1,39 @@
 # Arquitectura
 
-Mapa del código del SIS Facturador. Lo que sigue describe el modo
-single-tenant (1 deploy = 1 RUC), que es el implementado y validado en
-producción. El modo multi-tenant provider está cubierto aparte en
-[`DEPLOY_PROVIDER.md`](./DEPLOY_PROVIDER.md).
+Mapa del código del SIS Facturador. El repo es un workspace con dos
+paquetes Python independientes:
+
+- **`pe-invoicing`** (`packages/core/`): SDK con la lógica del estándar
+  SUNAT. Sin opinión sobre HTTP ni persistencia. Publicable a PyPI.
+- **`sis-facturador`** (`packages/api/`): microservicio HTTP que envuelve
+  el SDK con FastAPI, persistencia y storage. Es lo que se despliega en
+  Vercel.
+
+Lo que sigue describe el modo single-tenant (1 deploy = 1 RUC). El modo
+multi-tenant provider está en [`DEPLOY_PROVIDER.md`](./DEPLOY_PROVIDER.md).
 
 ## Vista de capas
 
 ```
 ┌────────────────────────────────────────────────────────────┐
 │                      HTTP (FastAPI)                         │
-│   app/main.py · app/routers/invoices.py                     │
+│   sis_facturador/main.py · sis_facturador/routers/          │
 └─────────────────────────────┬───────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────┐
 │                    Servicio (orquestación)                  │
-│   app/services/invoice_service.py                           │
+│   sis_facturador/services/invoice_service.py                │
+│   sis_facturador/sunat_runtime.py (caches del SDK)          │
 └─┬─────────────┬──────────────┬──────────────┬───────────────┘
   │             │              │              │
   ▼             ▼              ▼              ▼
 ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────────┐
-│  UBL     │ │  Signer  │ │  SUNAT   │ │  Persistence   │
-│ builder  │ │ XMLDSig  │ │  client  │ │  ORM + Storage │
-│          │ │          │ │  (zeep)  │ │                │
-│ app/ubl/ │ │app/signer│ │app/sunat │ │ app/models/    │
-│          │ │          │ │          │ │ app/storage/   │
+│  pe_invoi│ │ pe_invoi │ │ pe_invoi │ │  sis_facturador│
+│  cing.ubl│ │ cing.    │ │ cing.    │ │  models +      │
+│          │ │ signer   │ │ sunat    │ │  storage       │
 └──────────┘ └──────────┘ └──────────┘ └────────────────┘
+   ↑                                          ↑
+   └─── packages/core (SDK) ──────┘  └─ packages/api ─┘
 ```
 
 ## Diagrama de flujo (Mermaid)
@@ -36,9 +44,9 @@ sequenceDiagram
     participant Client as Cliente HTTP
     participant Router as POST /v1/invoices
     participant Service as invoice_service.create_and_send
-    participant Builder as ubl.builder
-    participant Signer as signer.xmldsig
-    participant Packager as sunat.packager
+    participant Builder as pe_invoicing.ubl.builder
+    participant Signer as pe_invoicing.signer.xmldsig
+    participant Packager as pe_invoicing.sunat.packager
     participant SUNAT as SUNAT WS (sendBill)
     participant Storage as Storage (Supabase / local)
     participant DB as Postgres
@@ -61,114 +69,124 @@ sequenceDiagram
     Router-->>Client: InvoiceResponse JSON
 ```
 
-## Responsabilidad de cada módulo
+## Frontera SDK / servicio
 
-### `app/main.py`
+La regla operativa: **el SDK no sabe que existe el servicio**. Concretamente:
 
-Bootstrap de la app FastAPI. Define healthchecks (`/v1/health`,
-`/v1/health/cert`), aplica middleware (CORS, manejo global de excepciones) y
-monta el router de `invoices`.
+- El SDK no importa `fastapi`, `sqlalchemy`, `pydantic-settings` ni ninguna
+  cosa del servicio.
+- El SDK no lee env vars directamente: recibe todo por parámetros
+  (`pfx_base64`, `mode`, `ruc`, `username`, `password`).
+- El servicio importa el SDK con `from pe_invoicing import ...` o
+  `from pe_invoicing.X import ...` y le pasa los settings que vienen del
+  `.env`.
 
-### `app/config.py`
+Así, el SDK es testeable sin levantar nada del servicio, y el servicio
+puede agregar capas (multi-tenant, auth, rate limit) sin tocar el SDK.
 
-`Settings` basado en `pydantic-settings`. Lee variables de entorno desde
-`.env`. Expone propiedades calculadas: `sunat_wsdl` (apunta a beta o prod
-según `MODE`) y `sunat_username` (concatena `RUC + USER` para
-WS-Security).
+## Módulos del SDK (`packages/core/src/pe_invoicing/`)
 
-### `app/database.py`
+### `ubl/`
 
-Engine de SQLAlchemy 2.0 con `psycopg` v3. Normaliza el driver en la URL
-(acepta `postgresql://` y rewrita a `postgresql+psycopg://`). Usa `NullPool`
-en Vercel porque cada invocación es serverless y no comparte conexiones.
-Expone `get_db()` como dependency de FastAPI.
-
-### `app/security/cert_loader.py`
-
-Carga el `.pfx` desde `CERT_PFX_BASE64`, lo decodifica, extrae la RSA private
-key y el cert X.509. Verifica que la key sea RSA (SUNAT no acepta otra cosa).
-Devuelve un `CertBundle` con la key y el cert ya en formato PEM listos para
-`signxml`. Está cacheado con `lru_cache` — el cert se carga una sola vez por
-proceso.
-
-### `app/ubl/`
-
-- `models.py` — `dataclass`es planos: `Party`, `InvoiceLine`,
-  `InvoiceInput`. Sin lógica.
+- `models.py` — dataclasses planos: `Party`, `InvoiceLine`, `InvoiceInput`,
+  `InvoiceTotals`. Sin lógica.
 - `builder.py` — Toma un `InvoiceInput`, calcula totales (subtotal, IGV
   18%, total), convierte el monto a letras en español, y renderiza la
   plantilla Jinja2.
 - `templates/invoice_01.xml.j2` — Plantilla UBL 2.1. **Una sola plantilla
   para Factura y Boleta**: el `cbc:InvoiceTypeCode` se interpola desde
-  `inv.tipo_documento` (`"01"` para factura, `"03"` para boleta). Esto
-  evita duplicar la plantilla — la única diferencia real entre ambos
-  comprobantes en el WS sendBill es ese código y la serie.
+  `inv.tipo_documento` (`"01"` factura, `"03"` boleta).
 
-### `app/signer/xmldsig.py`
+### `signer/xmldsig.py`
 
 Una sola función pública: `sign_invoice_xml(xml, bundle) -> bytes`. Firma
-con `signxml.XMLSigner` configurado con:
-
-- `method=enveloped`
-- `signature_algorithm="rsa-sha256"`
-- `digest_algorithm="sha256"`
-- `c14n_algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"`
-
-`signxml` inserta el `ds:Signature` como último hijo del root del documento.
-SUNAT exige que viva dentro de
-`cac:UBLExtensions/cac:UBLExtension/cac:ExtensionContent`, así que después
-de firmar movemos el elemento. La transform `enveloped-signature` hace que
-el digest se calcule sin contar la firma misma — funciona aunque la firma
-termine fuera del root.
+con XMLDSig RSA-SHA256 + Exclusive C14N y reubica el `<ds:Signature>`
+dentro de `cac:UBLExtensions/cac:UBLExtension/cac:ExtensionContent` (donde
+SUNAT lo exige).
 
 Detalle profundo en [`SIGNING.md`](./SIGNING.md).
 
-### `app/sunat/`
+### `sunat/`
 
-- `client.py` — Cliente `zeep` cacheado en `lru_cache(maxsize=1)`. Usa
-  WSDLs locales (no descarga del internet — SUNAT rate-limita el
-  `?ns1.wsdl`). Maneja WS-Security con `UsernameToken`. Expone `send_bill`,
-  que clasifica la respuesta en `accepted` / `accepted_with_obs` /
-  `rejected` y devuelve `SunatResult`.
-- `packager.py` — `pack_invoice(xml, filename_base)` crea el ZIP que SUNAT
-  espera. `unpack_cdr(response)` decodifica el `applicationResponse` (zeep
-  ya lo decodificó de base64 a bytes ZIP — detectamos el magic `PK`).
-- `wsdl/{beta,prod}/` — WSDLs descargados una vez y patcheados para que las
-  refs internas (`?ns1.wsdl`, `?xsd2.xsd`) apunten a los archivos locales.
+- `client.py` — Construye el cliente `zeep` con `build_zeep_client(mode,
+  ruc, username, password)` y lo usa para `send_bill(client, zip_bytes,
+  filename)`. **El SDK no cachea el cliente**: el caller decide si tiene
+  uno global o uno por tenant.
+- `packager.py` — `pack_invoice(xml, filename_base)` arma el ZIP que SUNAT
+  espera. `unpack_cdr(response)` decodifica el `applicationResponse`.
+- `wsdl/{beta,prod}/` — WSDLs descargados una vez y patcheados para que
+  las refs internas apunten a los archivos locales (evita el rate-limit de
+  SUNAT en `?ns1.wsdl`).
 
-### `app/storage/`
+### `security/cert_loader.py`
+
+Funciones puras: `load_cert_from_pfx(pfx_bytes, password)` y
+`load_cert_from_base64(pfx_base64, password)`. Devuelven un `CertBundle`
+con la RSA private key y el cert X.509 ya en formato PEM listos para
+`signxml`. SUNAT solo acepta RSA — si el PFX trae otra cosa, levanta
+`ValueError`.
+
+## Módulos del servicio (`packages/api/src/sis_facturador/`)
+
+### `main.py`
+
+Bootstrap de la app FastAPI. Define metadata OpenAPI (title, contact,
+license_info, description con links), CORS middleware, exception handler
+global, healthchecks (`/v1/health`, `/v1/health/cert`) y monta el router de
+`invoices`. El root `/` redirige a `/docs`.
+
+### `config.py`
+
+`Settings` basado en `pydantic-settings`. Lee variables de entorno desde
+`.env`. Expone propiedades calculadas: `sunat_wsdl` (apunta a beta o prod
+según `MODE`) y `sunat_username` (concatena `RUC + USER` para WS-Security).
+
+### `database.py`
+
+Engine de SQLAlchemy 2.0 con `psycopg` v3. Normaliza el driver en la URL
+(acepta `postgresql://` y rewrita a `postgresql+psycopg://`). Usa
+`NullPool` en Vercel porque cada invocación es serverless. Expone
+`get_db()` como dependency de FastAPI.
+
+### `sunat_runtime.py`
+
+Caches del SDK leyendo del `Settings`. `get_cert()` carga el cert una sola
+vez por proceso. `get_sunat_client()` arma el cliente zeep una sola vez.
+Para multi-tenant, este archivo es el único que cambia (caches por tenant
+en lugar de globales).
+
+### `storage/`
 
 Adaptadores intercambiables. `STORAGE_BACKEND=local` escribe a filesystem
-(útil en dev). `STORAGE_BACKEND=supabase` sube al bucket de Supabase Storage
-(necesario en Vercel porque el filesystem es efímero).
+(útil en dev). `STORAGE_BACKEND=supabase` sube al bucket de Supabase
+Storage (necesario en Vercel porque el filesystem es efímero).
 
-### `app/models/invoice.py`
+### `models/invoice.py`
 
 ORM SQLAlchemy de la tabla `invoices`. Guarda: ruc, serie, número, tipo,
-totales, status devuelto por SUNAT, code, descripción, URLs del XML firmado
-y del CDR, timestamps. La constraint `(ruc, tipo, serie, numero)` es UNIQUE
-— si intentas insertar el mismo comprobante dos veces, el router lo captura
-y devuelve 409 Conflict.
+totales, status devuelto por SUNAT, code, descripción, URLs del XML
+firmado y del CDR, timestamps. La constraint `(ruc, tipo, serie, numero)`
+es UNIQUE.
 
-### `app/schemas/invoice.py`
+### `schemas/invoice.py`
 
-Pydantic v2 con `Annotated` y `Field`. Valida strings (regex de RUC, longitud
-de razón social, etc.), normaliza decimales, separa `InvoiceCreate` (input)
-de `InvoiceResponse` (output con campos calculados como las URLs del
-storage).
+Pydantic v2 con `Annotated` y `Field`. Valida el payload, separa
+`InvoiceCreate` (input) de `InvoiceResponse` (output). Validador custom:
+la `serie` debe matchear el `tipo_documento` (factura `F###`, boleta
+`B###`).
 
-### `app/services/invoice_service.py`
+### `services/invoice_service.py`
 
 La orquestación. `create_and_send(db, payload)` hace:
 
-1. Convierte el `InvoiceCreate` Pydantic a `InvoiceInput` dataclass.
-2. Llama al builder, signer, packager.
-3. Llama a `send_bill` y captura el resultado.
+1. Convierte el `InvoiceCreate` Pydantic a `InvoiceInput` del SDK.
+2. Llama al builder, signer, packager (todos del SDK).
+3. Construye el cliente zeep cacheado y llama `send_bill`.
 4. Sube XML y CDR al storage.
 5. Persiste el registro en BD.
 6. Devuelve el `Invoice` ORM.
 
-### `app/routers/invoices.py`
+### `routers/invoices.py`
 
 Endpoints REST. Captura excepciones específicas y las traduce a HTTP:
 
@@ -181,39 +199,37 @@ Errores de negocio devueltos por SUNAT con un código numérico (rechazos)
 
 ## Modelo de tenancy
 
-El código actual asume **un solo RUC por deploy**. La identidad del emisor
-vive en envs (`SUNAT_RUC`, `SUNAT_USER`, `SUNAT_PASSWORD`, `CERT_PFX_BASE64`).
-No hay tabla de tenants ni middleware de resolución.
+El servicio actual asume **un solo RUC por deploy**. La identidad del
+emisor vive en envs (`SUNAT_RUC`, `SUNAT_USER`, `SUNAT_PASSWORD`,
+`CERT_PFX_BASE64`). No hay tabla de tenants ni middleware de resolución.
 
-Para evolucionar a multi-tenant sin romper el modo actual, el plan
-conceptual está en [`DEPLOY_PROVIDER.md`](./DEPLOY_PROVIDER.md). La idea
-gruesa es:
-
-- Agregar un middleware opcional (activable por env) que resuelva el tenant
-  desde un header `X-Tenant-Id` o un subdominio.
-- Reemplazar el `cert_loader` cacheado por uno que cargue por tenant desde
-  un vault.
-- Activar RLS en Postgres con una columna `tenant_id` en `invoices`.
-- Todo regla "cero ramas por modo" — el código actual queda como caso
-  particular con `tenant_id` por defecto.
+Para evolucionar a multi-tenant sin romper el modo actual: el plan vive
+en [`DEPLOY_PROVIDER.md`](./DEPLOY_PROVIDER.md). Como el SDK ya está
+desacoplado, el cambio aterriza solo en `sunat_runtime.py` (caches por
+tenant) y en middlewares nuevos del servicio. El SDK no se toca.
 
 ## Decisiones de diseño explícitas
 
-**Una sola plantilla UBL para factura y boleta.** Considerado dos plantillas
-separadas (`invoice_01.xml.j2`, `boleta_03.xml.j2`); rechazado porque la
-única diferencia real es el `InvoiceTypeCode`. Parametrizar por
-`tipo_documento` en `InvoiceInput` mantiene la plantilla DRY y deja el
-código del builder agnóstico.
+**Workspace con dos paquetes en lugar de uno solo.** El SDK
+`pe-invoicing` puede vivir su vida en PyPI sin arrastrar FastAPI ni
+SQLAlchemy. Un dev que quiera firmar comprobantes desde su propio Django
+o lambda hace `pip install pe-invoicing` y listo, sin tocar el servicio.
+
+**Una sola plantilla UBL para factura y boleta.** Considerado dos
+plantillas separadas; rechazado porque la única diferencia real es el
+`InvoiceTypeCode`. Parametrizar por `tipo_documento` en `InvoiceInput`
+mantiene el código DRY.
 
 **WSDLs bundleados localmente.** SUNAT rate-limita el endpoint del import
 `?ns1.wsdl`: la primera fetch responde 200, las siguientes 401, y `zeep`
 hace varias durante init. Bundlearlos es la práctica estándar.
 
-**Cliente zeep cacheado.** `lru_cache(maxsize=1)` en `_get_client()`. La
-inicialización del cliente parsea WSDL completo (lento), no lo queremos
-hacer por request.
+**El SDK no cachea el cliente zeep ni el cert.** El cache vive en
+`sunat_runtime.py` del servicio. Eso permite que el SDK sirva tanto el
+caso single-tenant (un cache global) como multi-tenant (un cache por
+tenant) sin cambios.
 
-**`signxml` y no `lxml.signature` o implementación propia.** `signxml` es
+**`signxml` y no implementación propia de XMLDSig.** `signxml` es
 mantenido y soporta correctamente la transform `enveloped-signature` con
 URI vacío + Exclusive C14N que SUNAT exige. Implementar XMLDSig a mano es
 posible pero invita errores sutiles de canonicalización.
@@ -221,8 +237,8 @@ posible pero invita errores sutiles de canonicalización.
 **`zeep` y no `requests` con XML armado a mano.** El WSDL de SUNAT tiene
 WS-Security con `UsernameToken`, schemas con tipos custom (`xsd:base64Binary`
 para el ZIP), y operaciones que devuelven respuestas estructuradas. `zeep`
-maneja todo esto. Bajar a HTTP plano sería rehacer trabajo gratis.
+maneja todo esto.
 
 **`psycopg` v3 (binary). SQLAlchemy 2.0.** Stack actualizado.
-`psycopg[binary]` evita compilar contra `libpq` del sistema (importante en
-Vercel, que no tiene compilador en runtime).
+`psycopg[binary]` evita compilar contra `libpq` del sistema (importante
+en Vercel, que no tiene compilador en runtime).

@@ -18,17 +18,20 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO_ROOT))
-
 from cryptography.x509.oid import NameOID
 from lxml import etree
+from pe_invoicing import (
+    InvoiceInput,
+    InvoiceLine,
+    Party,
+    build_invoice_xml,
+    load_cert_from_base64,
+    sign_invoice_xml,
+)
 from signxml import XMLVerifier
+from sis_facturador.config import settings
 
-from app.security.cert_loader import load_cert
-from app.signer.xmldsig import sign_invoice_xml
-from app.ubl.builder import build_invoice_xml
-from app.ubl.models import InvoiceInput, InvoiceLine, Party
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _name_str(x509_name) -> str:
@@ -49,7 +52,7 @@ def main() -> int:
     print("=" * 70)
 
     print("\n[1/5] Cargando .p12 desde CERT_PFX_BASE64...")
-    bundle = load_cert()
+    bundle = load_cert_from_base64(settings.CERT_PFX_BASE64, settings.CERT_PASSWORD)
     cert = bundle.certificate
     print("      OK")
 

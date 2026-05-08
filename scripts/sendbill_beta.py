@@ -24,16 +24,21 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO_ROOT))
+from pe_invoicing import (
+    InvoiceInput,
+    InvoiceLine,
+    Party,
+    SunatError,
+    build_invoice_xml,
+    build_zeep_client,
+    load_cert_from_base64,
+    pack_invoice,
+    send_bill,
+    sign_invoice_xml,
+)
+from sis_facturador.config import settings
 
-from app.config import settings
-from app.security.cert_loader import load_cert
-from app.signer.xmldsig import sign_invoice_xml
-from app.sunat.client import SunatError, send_bill
-from app.sunat.packager import pack_invoice
-from app.ubl.builder import build_invoice_xml
-from app.ubl.models import InvoiceInput, InvoiceLine, Party
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 EMISOR_RAZON = "TRANSP M & L EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA"
 RECEPTOR_RUC = "20100070970"
@@ -59,7 +64,7 @@ def main() -> int:
     print(f"RUC      : {settings.SUNAT_RUC}")
 
     print("\n[1/5] Cargando cert...")
-    bundle = load_cert()
+    bundle = load_cert_from_base64(settings.CERT_PFX_BASE64, settings.CERT_PASSWORD)
     print(f"      OK - {bundle.common_name[:60]}...")
 
     serie = "F001"
@@ -112,8 +117,14 @@ def main() -> int:
     print(f"      ZIP: {len(zip_bytes)} bytes")
 
     print("\n[4/5] Enviando a SUNAT beta (sendBill)...")
+    client = build_zeep_client(
+        mode=settings.MODE,
+        ruc=settings.SUNAT_RUC,
+        username=settings.SUNAT_USER,
+        password=settings.SUNAT_PASSWORD,
+    )
     try:
-        result = send_bill(zip_bytes, f"{filename_base}.zip")
+        result = send_bill(client, zip_bytes, f"{filename_base}.zip")
     except SunatError as e:
         print(f"      *** ERROR DE TRANSPORTE/FAULT: {e.code} - {e.message}")
         return 3

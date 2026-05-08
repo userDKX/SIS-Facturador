@@ -1,76 +1,22 @@
-[build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+# Workspace root del repo. NO es un paquete instalable en si mismo.
+#
+# Los paquetes publicables viven en packages/:
+#   - packages/core/  -> pe-invoicing (SDK, publicable a PyPI)
+#   - packages/api/   -> sis-facturador (microservicio HTTP)
+#
+# Este pyproject solo contiene la config de tooling (ruff, mypy, pytest,
+# coverage) compartida por todo el repo. Cuando corres `ruff check .` o
+# `pytest` desde la raiz, esta config aplica.
 
 [project]
-name = "sis-facturador"
-version = "0.1.0"
-description = "API REST de facturación electrónica SUNAT (Perú) en Python nativo. Factura/Boleta UBL 2.1 + XMLDSig + SOAP, validada en producción."
-readme = "README.md"
+name = "sis-facturador-workspace"
+version = "0.0.0"
+description = "Workspace root. No instalable. Ver packages/core y packages/api."
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
-authors = [
-    { name = "Luis Luza M.", email = "noreply@userdkx.dev" },
-]
-keywords = [
-    "sunat",
-    "sunat-peru",
-    "electronic-invoicing",
-    "ubl-2.1",
-    "xmldsig",
-    "fastapi",
-    "peru",
-    "factura-electronica",
-    "boleta-electronica",
-]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Framework :: FastAPI",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Office/Business :: Financial",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Natural Language :: Spanish",
-]
-dependencies = [
-    "fastapi==0.115.6",
-    "pydantic==2.10.4",
-    "pydantic-settings==2.7.1",
-    "sqlalchemy==2.0.36",
-    "psycopg[binary]==3.2.3",
-    "lxml==5.3.0",
-    "jinja2==3.1.5",
-    "signxml==4.0.3",
-    "cryptography==44.0.0",
-    "zeep==4.3.1",
-    "supabase==2.11.0",
-    "httpx==0.28.1",
-]
 
-[project.optional-dependencies]
-dev = [
-    "pytest==8.3.4",
-    "pytest-cov>=5.0",
-    "ruff>=0.8",
-    "mypy>=1.13",
-    "pre-commit>=4.0",
-    "types-lxml>=2024.12",
-]
-
-[project.urls]
-Homepage = "https://github.com/userDKX/SIS-Facturador"
-Repository = "https://github.com/userDKX/SIS-Facturador"
-Issues = "https://github.com/userDKX/SIS-Facturador/issues"
-Changelog = "https://github.com/userDKX/SIS-Facturador/blob/main/CHANGELOG.md"
-
-[tool.setuptools.packages.find]
-include = ["app*"]
-exclude = ["tests*", "scripts*", "migrations*"]
+[tool.setuptools]
+# Workspace root: no construye nada en si mismo.
+packages = []
 
 # ---------------------------------------------------------------------------
 # Ruff — linter + formatter (Black-compatible)
@@ -80,8 +26,10 @@ line-length = 100
 target-version = "py311"
 extend-exclude = [
     ".venv",
-    "app/sunat/wsdl",
+    "packages/core/src/pe_invoicing/sunat/wsdl",
     "migrations",
+    "build",
+    "dist",
 ]
 
 [tool.ruff.lint]
@@ -100,8 +48,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["B011"]  # allow assert False in tests
-"scripts/**" = ["E402"]  # scripts manipulate sys.path before imports
+"**/tests/**" = ["B011"]   # allow assert False in tests
+"scripts/**" = ["E402"]    # scripts manipulate sys.path before imports
 
 [tool.ruff.format]
 quote-style = "double"
@@ -109,20 +57,20 @@ indent-style = "space"
 line-ending = "lf"
 
 # ---------------------------------------------------------------------------
-# Mypy — strict on app/, lenient elsewhere
+# Mypy
 # ---------------------------------------------------------------------------
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
-ignore_missing_imports = true  # zeep, signxml lack complete stubs
+ignore_missing_imports = true
 exclude = [
     "tests/",
     "scripts/",
     "migrations/",
-    "app/sunat/wsdl/",
     ".venv/",
+    "packages/core/src/pe_invoicing/sunat/wsdl/",
 ]
 
 [[tool.mypy.overrides]]
@@ -133,7 +81,7 @@ ignore_errors = true
 # Pytest
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["packages/core/tests", "packages/api/tests"]
 python_files = ["test_*.py"]
 markers = [
     "beta: integration tests against SUNAT beta (require MODDATOS envs configured)",
@@ -147,12 +95,14 @@ addopts = [
 # Coverage
 # ---------------------------------------------------------------------------
 [tool.coverage.run]
-source = ["app"]
+source = [
+    "packages/core/src/pe_invoicing",
+    "packages/api/src/sis_facturador",
+]
 branch = true
 omit = [
-    "app/sunat/wsdl/*",
-    "app/__init__.py",
-    "app/*/__init__.py",
+    "**/wsdl/*",
+    "**/__init__.py",
 ]
 
 [tool.coverage.report]

@@ -34,8 +34,9 @@ htmlcov/
 *.key
 *.crt
 
-# Storage local (XMLs firmados, CDRs)
-storage/
+# Storage local de runtime (XMLs firmados, CDRs)
+# Solo en la raiz — no afecta packages/api/src/sis_facturador/storage/ que es modulo Python
+/storage/
 
 # IDE
 .vscode/
