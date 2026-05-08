@@ -1,10 +1,10 @@
 # SIS Facturador
 
-[![CI](https://github.com/dukex57/sis-facturador/actions/workflows/ci.yml/badge.svg)](https://github.com/dukex57/sis-facturador/actions/workflows/ci.yml)
+[![CI](https://github.com/userDKX/SIS-Facturador/actions/workflows/ci.yml/badge.svg)](https://github.com/userDKX/SIS-Facturador/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![License](https://img.shields.io/github/license/dukex57/sis-facturador)](./LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/dukex57/sis-facturador)](https://github.com/dukex57/sis-facturador/commits/main)
+[![License](https://img.shields.io/github/license/userDKX/SIS-Facturador)](./LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/userDKX/SIS-Facturador)](https://github.com/userDKX/SIS-Facturador/commits/main)
 
 API REST para facturar electrónicamente ante SUNAT (Perú), escrita en Python.
 Genera Factura (`01`) y Boleta (`03`) en UBL 2.1, las firma con XMLDSig
@@ -49,8 +49,8 @@ Documentos → Consultar Envíos de CPE*.
 ## Cómo correrlo en local (con cert de prueba MODDATOS)
 
 ```powershell
-git clone https://github.com/dukex57/sis-facturador.git
-cd sis-facturador
+git clone https://github.com/userDKX/SIS-Facturador.git
+cd SIS-Facturador
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -186,7 +186,7 @@ los detalles raros del SOL.
 
 ## Quién mantiene esto
 
-Construido por **Luis Luza M.** ([@dukex57](https://github.com/dukex57)) en
+Construido por **Luis Luza M.** ([@userDKX](https://github.com/userDKX)) en
 Lima. Lo uso en producción para clientes del sistema SIS y lo dejo abierto
 para que cualquier dev peruano que esté empezando con SUNAT en Python tenga
 una referencia que funcione.

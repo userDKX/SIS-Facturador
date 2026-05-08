@@ -5,7 +5,7 @@
 Si encuentras una vulnerabilidad de seguridad en **SIS Facturador**, no abras
 un issue público. En su lugar:
 
-- Abre un [reporte privado de seguridad](https://github.com/dukex57/sis-facturador/security/advisories/new)
+- Abre un [reporte privado de seguridad](https://github.com/userDKX/SIS-Facturador/security/advisories/new)
   en este repo, o
 - Escríbele al mantenedor (contacto en el perfil de GitHub).
 

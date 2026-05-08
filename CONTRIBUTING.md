@@ -8,8 +8,8 @@ repo: cómo armar el entorno, qué convenciones seguimos, cómo abrir un PR.
 Antes de tocar código, tener listo el entorno:
 
 ```bash
-git clone https://github.com/dukex57/sis-facturador.git
-cd sis-facturador
+git clone https://github.com/userDKX/SIS-Facturador.git
+cd SIS-Facturador
 python -m venv .venv
 source .venv/bin/activate    # o .\.venv\Scripts\Activate.ps1 en Windows
 pip install -e ".[dev]"

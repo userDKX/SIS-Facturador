@@ -53,5 +53,5 @@ como "Procesado" en el portal SOL del contribuyente.
 - `CDATA` + autoescape de Jinja2 produce double-encoding de entidades — la
   plantilla deja que Jinja maneje el escape.
 
-[Sin publicar]: https://github.com/dukex57/sis-facturador/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/dukex57/sis-facturador/releases/tag/v0.1.0
+[Sin publicar]: https://github.com/userDKX/SIS-Facturador/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/userDKX/SIS-Facturador/releases/tag/v0.1.0

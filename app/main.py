@@ -17,12 +17,12 @@ API REST para emitir comprobantes electrónicos a SUNAT (Perú): Factura
 RSA-SHA256, envía por SOAP al WS del contribuyente (SEE-DSC) y devuelve el
 CDR.
 
-Documentación completa en el [repositorio](https://github.com/dukex57/sis-facturador):
+Documentación completa en el [repositorio](https://github.com/userDKX/SIS-Facturador):
 
-* [`docs/INSTALL.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/INSTALL.md) — instalación local
-* [`docs/SUNAT_SETUP.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/SUNAT_SETUP.md) — onboarding del RUC en SUNAT
-* [`docs/SIGNING.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/SIGNING.md) — detalles de la firma XMLDSig
-* [`docs/TROUBLESHOOTING.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/TROUBLESHOOTING.md) — diagnóstico de errores
+* [`docs/INSTALL.md`](https://github.com/userDKX/SIS-Facturador/blob/main/docs/INSTALL.md) — instalación local
+* [`docs/SUNAT_SETUP.md`](https://github.com/userDKX/SIS-Facturador/blob/main/docs/SUNAT_SETUP.md) — onboarding del RUC en SUNAT
+* [`docs/SIGNING.md`](https://github.com/userDKX/SIS-Facturador/blob/main/docs/SIGNING.md) — detalles de la firma XMLDSig
+* [`docs/TROUBLESHOOTING.md`](https://github.com/userDKX/SIS-Facturador/blob/main/docs/TROUBLESHOOTING.md) — diagnóstico de errores
 """
 
 TAGS_METADATA = [
@@ -45,11 +45,11 @@ app = FastAPI(
     version=__version__,
     contact={
         "name": "Luis Luza M.",
-        "url": "https://github.com/dukex57/sis-facturador",
+        "url": "https://github.com/userDKX/SIS-Facturador",
     },
     license_info={
         "name": "MIT",
-        "url": "https://github.com/dukex57/sis-facturador/blob/main/LICENSE",
+        "url": "https://github.com/userDKX/SIS-Facturador/blob/main/LICENSE",
     },
     openapi_tags=TAGS_METADATA,
 )

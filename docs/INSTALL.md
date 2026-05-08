@@ -26,8 +26,8 @@ En macOS, a veces necesitas `brew install libpq` para que `psycopg` enlace.
 PowerShell (Windows):
 
 ```powershell
-git clone https://github.com/dukex57/sis-facturador.git
-cd sis-facturador
+git clone https://github.com/userDKX/SIS-Facturador.git
+cd SIS-Facturador
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
@@ -35,8 +35,8 @@ python -m venv .venv
 bash / zsh (macOS, Linux, WSL):
 
 ```bash
-git clone https://github.com/dukex57/sis-facturador.git
-cd sis-facturador
+git clone https://github.com/userDKX/SIS-Facturador.git
+cd SIS-Facturador
 python -m venv .venv
 source .venv/bin/activate
 ```

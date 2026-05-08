@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Luis Luza M.", email = "noreply@dukex57.dev" },
+    { name = "Luis Luza M.", email = "noreply@userdkx.dev" },
 ]
 keywords = [
     "sunat",
@@ -63,10 +63,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dukex57/sis-facturador"
-Repository = "https://github.com/dukex57/sis-facturador"
-Issues = "https://github.com/dukex57/sis-facturador/issues"
-Changelog = "https://github.com/dukex57/sis-facturador/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/userDKX/SIS-Facturador"
+Repository = "https://github.com/userDKX/SIS-Facturador"
+Issues = "https://github.com/userDKX/SIS-Facturador/issues"
+Changelog = "https://github.com/userDKX/SIS-Facturador/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["app*"]
