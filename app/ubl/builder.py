@@ -15,13 +15,53 @@ CURRENCY_NAMES = {
     "EUR": ("EUROS", "EURO"),
 }
 
-_UNIDADES = ["", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE",
-             "DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISEIS",
-             "DIECISIETE", "DIECIOCHO", "DIECINUEVE", "VEINTE"]
-_DECENAS = ["", "", "VEINTI", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA",
-            "SETENTA", "OCHENTA", "NOVENTA"]
-_CENTENAS = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS",
-             "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"]
+_UNIDADES = [
+    "",
+    "UNO",
+    "DOS",
+    "TRES",
+    "CUATRO",
+    "CINCO",
+    "SEIS",
+    "SIETE",
+    "OCHO",
+    "NUEVE",
+    "DIEZ",
+    "ONCE",
+    "DOCE",
+    "TRECE",
+    "CATORCE",
+    "QUINCE",
+    "DIECISEIS",
+    "DIECISIETE",
+    "DIECIOCHO",
+    "DIECINUEVE",
+    "VEINTE",
+]
+_DECENAS = [
+    "",
+    "",
+    "VEINTI",
+    "TREINTA",
+    "CUARENTA",
+    "CINCUENTA",
+    "SESENTA",
+    "SETENTA",
+    "OCHENTA",
+    "NOVENTA",
+]
+_CENTENAS = [
+    "",
+    "CIENTO",
+    "DOSCIENTOS",
+    "TRESCIENTOS",
+    "CUATROCIENTOS",
+    "QUINIENTOS",
+    "SEISCIENTOS",
+    "SETECIENTOS",
+    "OCHOCIENTOS",
+    "NOVECIENTOS",
+]
 
 
 def _hasta_999(n: int) -> str:
@@ -81,6 +121,7 @@ def monto_en_letras(total: Decimal, moneda: str) -> str:
     centavos = int((total - entero).quantize(TWO_DP, rounding=ROUND_HALF_UP) * 100)
     letras = _numero_a_letras(entero)
     return f"SON {letras} CON {centavos:02d}/100 {plural}"
+
 
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
 _env = Environment(

@@ -42,9 +42,7 @@ def sign_invoice_xml(xml: str, bundle: CertBundle) -> bytes:
         f"{{{NS_EXT}}}UBLExtensions/{{{NS_EXT}}}UBLExtension/{{{NS_EXT}}}ExtensionContent"
     )
     if ext_content is None:
-        raise RuntimeError(
-            "ext:UBLExtensions/ext:UBLExtension/ext:ExtensionContent no encontrado"
-        )
+        raise RuntimeError("ext:UBLExtensions/ext:UBLExtension/ext:ExtensionContent no encontrado")
 
     signed_root.remove(signature)
     ext_content.append(signature)

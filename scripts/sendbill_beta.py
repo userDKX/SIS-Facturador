@@ -16,6 +16,7 @@ Requiere en .env:
   CERT_PFX_BASE64=<...>
   CERT_PASSWORD=<...>
 """
+
 from __future__ import annotations
 
 import sys

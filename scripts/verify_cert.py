@@ -10,10 +10,11 @@ Hace:
 
 Cero contacto con SUNAT. Cero efecto tributario. Cero escritura a DB.
 """
+
 from __future__ import annotations
 
 import sys
-from datetime import date, timezone
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
@@ -71,8 +72,10 @@ def main() -> int:
     else:
         print(f"      Vigente: faltan {days_left} dias")
 
-    print(f"      Public key : {bundle.private_key.key_size} bits "
-          f"({type(bundle.private_key).__name__})")
+    print(
+        f"      Public key : {bundle.private_key.key_size} bits "
+        f"({type(bundle.private_key).__name__})"
+    )
 
     print("\n[3/5] Construyendo UBL 2.1 de muestra (sin enviar a SUNAT)...")
     emisor = Party(

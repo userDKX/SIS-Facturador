@@ -53,9 +53,7 @@ def test_build_invoice_xml_has_required_tags(sample_invoice_input):
     assert root.find(f"{{{NS_CBC}}}ID").text == "F001-1"
     assert root.find(f"{{{NS_CBC}}}DocumentCurrencyCode").text == "PEN"
 
-    payable = root.find(
-        f"{{{NS_CAC}}}LegalMonetaryTotal/{{{NS_CBC}}}PayableAmount"
-    )
+    payable = root.find(f"{{{NS_CAC}}}LegalMonetaryTotal/{{{NS_CBC}}}PayableAmount")
     assert Decimal(payable.text) == Decimal("118.00")
 
 

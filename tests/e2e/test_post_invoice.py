@@ -3,7 +3,6 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-
 _REQUIRED_ENVS = (
     "DATABASE_URL",
     "SUPABASE_URL",

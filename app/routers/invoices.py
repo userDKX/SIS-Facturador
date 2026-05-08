@@ -15,20 +15,17 @@ router = APIRouter()
 def post_invoice(payload: InvoiceCreate, db: Session = Depends(get_db)) -> Invoice:
     try:
         return create_and_send(db, payload)
-    except IntegrityError:
+    except IntegrityError as exc:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=(
-                f"Ya existe un comprobante con serie={payload.serie} "
-                f"numero={payload.numero}"
-            ),
-        )
+            detail=(f"Ya existe un comprobante con serie={payload.serie} numero={payload.numero}"),
+        ) from exc
     except SunatError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"SUNAT no respondio correctamente: {exc.message}",
-        )
+        ) from exc
 
 
 @router.get("/{invoice_id}", response_model=InvoiceResponse)

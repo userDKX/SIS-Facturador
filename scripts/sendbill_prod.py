@@ -13,6 +13,7 @@ Lee del .env la config base; sobrescribe MODE=prod localmente para que el
 cliente cargue el WSDL de produccion. El .env puede quedarse en MODE=beta
 como default seguro.
 """
+
 from __future__ import annotations
 
 import os
@@ -41,6 +42,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from app.config import get_settings
+
 get_settings.cache_clear()
 
 from app.config import settings
@@ -77,14 +79,16 @@ def main() -> int:
     print(f"\nEndpoint   : {settings.sunat_wsdl}")
     print(f"WS-User    : {settings.sunat_username}")
     print(f"RUC emisor : {settings.SUNAT_RUC}")
-    print(f"\n--- Comprobante a emitir ---")
+    print("\n--- Comprobante a emitir ---")
     print(f"  Serie/numero  : {SERIE}-{NUMERO}")
-    tipo_label = {"6": "RUC", "1": "DNI", "4": "CE", "7": "Pasaporte"}.get(RECEPTOR_TIPO_DOC, RECEPTOR_TIPO_DOC)
+    tipo_label = {"6": "RUC", "1": "DNI", "4": "CE", "7": "Pasaporte"}.get(
+        RECEPTOR_TIPO_DOC, RECEPTOR_TIPO_DOC
+    )
     print(f"  Receptor      : {tipo_label} {RECEPTOR_NUMERO_DOC} - {RECEPTOR_NOMBRE}")
     print(f"  Item          : {ITEM_DESCRIPCION}")
     print(f"  Cantidad x P.U: {CANTIDAD} x S/ {PRECIO_UNITARIO}")
-    igv = (PRECIO_UNITARIO * CANTIDAD * Decimal('0.18')).quantize(Decimal('0.01'))
-    total = (PRECIO_UNITARIO * CANTIDAD + igv).quantize(Decimal('0.01'))
+    igv = (PRECIO_UNITARIO * CANTIDAD * Decimal("0.18")).quantize(Decimal("0.01"))
+    total = (PRECIO_UNITARIO * CANTIDAD + igv).quantize(Decimal("0.01"))
     print(f"  Base imponible: S/ {(PRECIO_UNITARIO * CANTIDAD).quantize(Decimal('0.01'))}")
     print(f"  IGV (18%)     : S/ {igv}")
     print(f"  TOTAL         : S/ {total}")

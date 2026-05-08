@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -44,10 +44,10 @@ def health_cert() -> dict:
     try:
         bundle = load_cert()
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"No se pudo cargar el cert: {exc}")
+        raise HTTPException(status_code=500, detail=f"No se pudo cargar el cert: {exc}") from exc
 
     expires_at = bundle.certificate.not_valid_after_utc
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return {
         "common_name": bundle.common_name,
         "serial": bundle.serial_hex,

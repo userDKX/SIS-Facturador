@@ -33,14 +33,13 @@ admin_url = DATABASE_URL.replace(f"/{db_name}", "/postgres", 1)
 
 
 def ensure_database() -> None:
-    with psycopg.connect(admin_url, autocommit=True) as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (db_name,))
-            if cur.fetchone():
-                print(f"DB {db_name} ya existe")
-                return
-            cur.execute(f'CREATE DATABASE "{db_name}"')
-            print(f"DB {db_name} creada")
+    with psycopg.connect(admin_url, autocommit=True) as conn, conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (db_name,))
+        if cur.fetchone():
+            print(f"DB {db_name} ya existe")
+            return
+        cur.execute(f'CREATE DATABASE "{db_name}"')
+        print(f"DB {db_name} creada")
 
 
 def apply_migrations() -> None:
