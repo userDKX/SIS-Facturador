@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Virtualenv
+.venv/
+venv/
+env/
+
+# Vercel
+.vercel/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Certificados (NUNCA commitear)
+*.pfx
+*.p12
+*.pem
+*.key
+*.crt
+
+# Storage local (XMLs firmados, CDRs)
+storage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

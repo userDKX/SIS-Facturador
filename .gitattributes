@@ -1,0 +1,27 @@
+# Force LF on text files for cross-platform CI consistency
+*.py        text eol=lf
+*.md        text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.toml      text eol=lf
+*.j2        text eol=lf
+*.xml       text eol=lf
+*.xsd       text eol=lf
+*.wsdl      text eol=lf
+*.json      text eol=lf
+*.sql       text eol=lf
+*.sh        text eol=lf
+*.http      text eol=lf
+*.cfg       text eol=lf
+*.ini       text eol=lf
+Makefile    text eol=lf
+.gitignore  text eol=lf
+.gitattributes text eol=lf
+
+# Binary
+*.pfx       binary
+*.p12       binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.zip       binary
