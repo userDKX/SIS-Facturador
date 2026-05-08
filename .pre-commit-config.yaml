@@ -1,0 +1,50 @@
+# See https://pre-commit.com for hook details
+default_install_hook_types: [pre-commit, commit-msg]
+default_language_version:
+  python: python3.12
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^app/sunat/wsdl/
+      - id: end-of-file-fixer
+        exclude: ^app/sunat/wsdl/
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+        exclude: ^app/sunat/wsdl/
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        files: ^app/
+        additional_dependencies:
+          - pydantic==2.10.4
+          - pydantic-settings==2.7.1
+          - sqlalchemy==2.0.36
+          - types-lxml
+
+  - repo: local
+    hooks:
+      - id: no-commit-to-main
+        name: prevent direct commits to main
+        entry: bash -c 'branch="$(git symbolic-ref --short HEAD)"; if [ "$branch" = "main" ]; then echo "Direct commits to main are not allowed. Use a feature branch."; exit 1; fi'
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
