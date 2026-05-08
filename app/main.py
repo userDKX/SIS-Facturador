@@ -3,17 +3,55 @@ from datetime import UTC, datetime
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
+from app import __version__
 from app.routers import invoices as invoices_router
 from app.security.cert_loader import load_cert
 
 logger = logging.getLogger(__name__)
 
+DESCRIPTION = """
+API REST para emitir comprobantes electrónicos a SUNAT (Perú): Factura
+(`01`) y Boleta de venta (`03`). Genera UBL 2.1, firma con XMLDSig
+RSA-SHA256, envía por SOAP al WS del contribuyente (SEE-DSC) y devuelve el
+CDR.
+
+Documentación completa en el [repositorio](https://github.com/dukex57/sis-facturador):
+
+* [`docs/INSTALL.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/INSTALL.md) — instalación local
+* [`docs/SUNAT_SETUP.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/SUNAT_SETUP.md) — onboarding del RUC en SUNAT
+* [`docs/SIGNING.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/SIGNING.md) — detalles de la firma XMLDSig
+* [`docs/TROUBLESHOOTING.md`](https://github.com/dukex57/sis-facturador/blob/main/docs/TROUBLESHOOTING.md) — diagnóstico de errores
+"""
+
+TAGS_METADATA = [
+    {
+        "name": "health",
+        "description": "Healthchecks del servicio y del certificado digital.",
+    },
+    {
+        "name": "invoices",
+        "description": (
+            "Emisión y consulta de comprobantes electrónicos. "
+            "POST `/v1/invoices` arma el UBL, firma, envía a SUNAT y persiste."
+        ),
+    },
+]
+
 app = FastAPI(
     title="SIS Facturador",
-    description="API de facturacion electronica SUNAT",
-    version="0.1.0",
+    description=DESCRIPTION,
+    version=__version__,
+    contact={
+        "name": "Luis Luza M.",
+        "url": "https://github.com/dukex57/sis-facturador",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://github.com/dukex57/sis-facturador/blob/main/LICENSE",
+    },
+    openapi_tags=TAGS_METADATA,
 )
 
 app.add_middleware(
@@ -34,13 +72,40 @@ def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     )
 
 
-@app.get("/v1/health")
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    return RedirectResponse(url="/docs")
+
+
+@app.get(
+    "/v1/health",
+    tags=["health"],
+    summary="Liveness check",
+    response_description="Servicio arriba.",
+)
 def health() -> dict[str, str]:
+    """Devuelve `{'status': 'ok'}` si el proceso está corriendo. No verifica
+    dependencias (BD, SUNAT) — para eso usa los healthchecks específicos."""
     return {"status": "ok"}
 
 
-@app.get("/v1/health/cert")
+@app.get(
+    "/v1/health/cert",
+    tags=["health"],
+    summary="Validez del certificado digital",
+    response_description="Metadata del cert cargado y si está vigente.",
+    responses={
+        500: {
+            "description": "El cert no se pudo cargar (CERT_PFX_BASE64 mal configurado o password incorrecta).",
+        },
+    },
+)
 def health_cert() -> dict:
+    """Carga el `.pfx` desde `CERT_PFX_BASE64`, extrae metadata del cert
+    X.509 y reporta si está vigente.
+
+    Útil después de un deploy para confirmar que el cert quedó bien
+    instalado antes de empezar a emitir."""
     try:
         bundle = load_cert()
     except Exception as exc:

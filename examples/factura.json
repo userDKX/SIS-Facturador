@@ -1,0 +1,31 @@
+{
+  "tipo_documento": "01",
+  "serie": "F001",
+  "numero": 123,
+  "fecha_emision": "2026-05-08",
+  "moneda": "PEN",
+  "receptor": {
+    "tipo_doc": "6",
+    "numero_doc": "20512345678",
+    "razon_social": "EMPRESA EJEMPLO S.A.C.",
+    "direccion": "AV. JAVIER PRADO 1234, SAN ISIDRO, LIMA"
+  },
+  "lines": [
+    {
+      "codigo": "PROD001",
+      "descripcion": "Servicio de consultoría",
+      "unidad": "ZZ",
+      "cantidad": "1.00",
+      "precio_unitario": "100.00",
+      "igv_afectacion": "10"
+    },
+    {
+      "codigo": "PROD002",
+      "descripcion": "Capacitación in-house (4 horas)",
+      "unidad": "HUR",
+      "cantidad": "4.00",
+      "precio_unitario": "50.00",
+      "igv_afectacion": "10"
+    }
+  ]
+}

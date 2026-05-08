@@ -127,15 +127,15 @@ el `CERT_PFX_BASE64` se pegó truncado o el password está mal.
 Desde tu máquina (no desde Vercel):
 
 ```bash
+BASE_URL="https://sis-facturador-xxx.vercel.app" bash examples/curl_examples.sh
+```
+
+O con `curl` directo usando los payloads de `examples/`:
+
+```bash
 curl -X POST https://sis-facturador-xxx.vercel.app/v1/invoices \
   -H "Content-Type: application/json" \
-  -d '{
-    "tipo_documento": "03",
-    "serie": "B001",
-    "numero": 1,
-    "moneda": "PEN",
-    ...
-  }'
+  -d @examples/boleta.json
 ```
 
 Si todo está bien, response 200 con el `Invoice` persistido y URLs al XML

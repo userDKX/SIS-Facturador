@@ -55,6 +55,7 @@ def _to_ubl_input(payload: InvoiceCreate) -> InvoiceInput:
         emisor=emisor,
         receptor=receptor,
         lines=lines,
+        tipo_documento=payload.tipo_documento,
     )
 
 
@@ -72,7 +73,7 @@ def create_and_send(db: Session, payload: InvoiceCreate) -> Invoice:
 
     invoice = Invoice(
         ruc_emisor=settings.SUNAT_RUC,
-        tipo_doc="01",
+        tipo_doc=payload.tipo_documento,
         serie=payload.serie,
         numero=payload.numero,
         fecha_emision=payload.fecha_emision,
@@ -88,7 +89,9 @@ def create_and_send(db: Session, payload: InvoiceCreate) -> Invoice:
     db.add(invoice)
     db.flush()
 
-    filename_base = f"{settings.SUNAT_RUC}-01-{payload.serie}-{payload.numero}"
+    filename_base = (
+        f"{settings.SUNAT_RUC}-{payload.tipo_documento}-{payload.serie}-{payload.numero}"
+    )
 
     try:
         unsigned_xml = build_invoice_xml(ubl_input)

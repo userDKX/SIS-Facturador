@@ -1,0 +1,23 @@
+{
+  "tipo_documento": "03",
+  "serie": "B001",
+  "numero": 456,
+  "fecha_emision": "2026-05-08",
+  "moneda": "PEN",
+  "receptor": {
+    "tipo_doc": "1",
+    "numero_doc": "12345678",
+    "razon_social": "JUAN PEREZ MENDOZA",
+    "direccion": ""
+  },
+  "lines": [
+    {
+      "codigo": "ART01",
+      "descripcion": "Polo manga corta talla M",
+      "unidad": "NIU",
+      "cantidad": "2.00",
+      "precio_unitario": "25.00",
+      "igv_afectacion": "10"
+    }
+  ]
+}

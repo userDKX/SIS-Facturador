@@ -168,8 +168,8 @@ curl -X POST http://localhost:8000/v1/invoices \
   -d @examples/factura.json
 ```
 
-(La carpeta `examples/` se llena en la Fase 4 del roadmap; mientras tanto,
-copia un payload desde `tests/e2e/test_post_invoice.py`.)
+Lista de payloads listos para usar en `examples/` (factura, boleta,
+boleta a consumidor final).
 
 ## 9. Ir a producción
 

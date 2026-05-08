@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ejemplo de CDR (Constancia de Recepción) que SUNAT devuelve cuando acepta
+  el comprobante. Es un applicationResponse UBL 2.1.
+
+  Campos relevantes:
+    - DocumentResponse/Response/ResponseCode
+        "0"   = aceptado
+        "098" = aceptado con observaciones (sigue valido)
+        otros = rechazado
+    - DocumentResponse/Response/Description
+        Mensaje human-readable
+    - Note
+        Lista de observaciones (si las hubo). Tipicamente "INFO 4242 ..."
+
+  Datos de este ejemplo: anonimizados a partir del CDR real de B001-1
+  emitida el 2026-05-08 (RUC anonimizado a 20XXXXXXXXX).
+-->
+<ar:ApplicationResponse xmlns:ar="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
+                        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:UBLVersionID>2.0</cbc:UBLVersionID>
+  <cbc:CustomizationID>1.0</cbc:CustomizationID>
+  <cbc:ID>1234567890</cbc:ID>
+  <cbc:IssueDate>2026-05-08</cbc:IssueDate>
+  <cbc:ResponseDate>2026-05-08</cbc:ResponseDate>
+  <cbc:ResponseTime>15:10:23</cbc:ResponseTime>
+  <cac:SenderParty>
+    <cac:PartyIdentification>
+      <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="6">20131312955</cbc:ID>
+    </cac:PartyIdentification>
+  </cac:SenderParty>
+  <cac:ReceiverParty>
+    <cac:PartyIdentification>
+      <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="6">20XXXXXXXXX</cbc:ID>
+    </cac:PartyIdentification>
+  </cac:ReceiverParty>
+  <cac:DocumentResponse>
+    <cac:Response>
+      <cbc:ReferenceID>B001-1</cbc:ReferenceID>
+      <cbc:ResponseCode>0</cbc:ResponseCode>
+      <cbc:Description>La Boleta numero B001-1, ha sido aceptada</cbc:Description>
+    </cac:Response>
+    <cac:DocumentReference>
+      <cbc:ID>B001-1</cbc:ID>
+    </cac:DocumentReference>
+    <cac:IssuerParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="6">20XXXXXXXXX</cbc:ID>
+      </cac:PartyIdentification>
+    </cac:IssuerParty>
+  </cac:DocumentResponse>
+</ar:ApplicationResponse>

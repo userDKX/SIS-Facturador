@@ -21,7 +21,7 @@ lectores: el que necesita usarlo (operador), el que quiere evaluarlo
 | Por qué SUNAT usa XMLDSig y no XAdES, y cómo lo firmamos             | [`SIGNING.md`](./SIGNING.md)                |
 | Detalles de UBL 2.1 que SUNAT valida                                 | [`UBL.md`](./UBL.md)                        |
 | El protocolo SOAP, los códigos de error, marco normativo 2024-2026   | [`SUNAT.md`](./SUNAT.md)                    |
-| Referencia HTTP de la API                                            | `API.md` (llega en la Fase 4 del roadmap)   |
+| Referencia HTTP de la API                                            | [`API.md`](./API.md)                        |
 
 ## Despliegue
 

@@ -1,0 +1,64 @@
+### Health del servicio
+GET http://localhost:8000/v1/health
+
+### Health del certificado
+GET http://localhost:8000/v1/health/cert
+
+### Emitir factura
+# Cuerpo en examples/factura.json
+POST http://localhost:8000/v1/invoices
+Content-Type: application/json
+
+{
+  "tipo_documento": "01",
+  "serie": "F001",
+  "numero": 123,
+  "fecha_emision": "2026-05-08",
+  "moneda": "PEN",
+  "receptor": {
+    "tipo_doc": "6",
+    "numero_doc": "20512345678",
+    "razon_social": "EMPRESA EJEMPLO S.A.C.",
+    "direccion": "AV. JAVIER PRADO 1234, SAN ISIDRO, LIMA"
+  },
+  "lines": [
+    {
+      "codigo": "PROD001",
+      "descripcion": "Servicio de consultoria",
+      "unidad": "ZZ",
+      "cantidad": "1.00",
+      "precio_unitario": "100.00",
+      "igv_afectacion": "10"
+    }
+  ]
+}
+
+### Emitir boleta a DNI
+POST http://localhost:8000/v1/invoices
+Content-Type: application/json
+
+{
+  "tipo_documento": "03",
+  "serie": "B001",
+  "numero": 456,
+  "fecha_emision": "2026-05-08",
+  "moneda": "PEN",
+  "receptor": {
+    "tipo_doc": "1",
+    "numero_doc": "12345678",
+    "razon_social": "JUAN PEREZ MENDOZA"
+  },
+  "lines": [
+    {
+      "codigo": "ART01",
+      "descripcion": "Polo manga corta",
+      "unidad": "NIU",
+      "cantidad": "2.00",
+      "precio_unitario": "25.00",
+      "igv_afectacion": "10"
+    }
+  ]
+}
+
+### Consultar comprobante por ID
+GET http://localhost:8000/v1/invoices/1
