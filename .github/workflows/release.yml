@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Crear GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extraer notas del CHANGELOG
+        id: changelog
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          # Extrae la sección [tag] del CHANGELOG hasta la siguiente entrada
+          notes=$(awk -v t="$tag" '
+            BEGIN{print_section=0}
+            /^## \[/ {
+              if (print_section) exit
+              if ($0 ~ "\\["t"\\]") print_section=1
+              next
+            }
+            print_section { print }
+          ' CHANGELOG.md)
+
+          if [ -z "$notes" ]; then
+            notes="See CHANGELOG.md for details."
+          fi
+
+          {
+            echo "notes<<EOF_NOTES"
+            echo "$notes"
+            echo "EOF_NOTES"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Crear release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: |
+            ${{ steps.changelog.outputs.notes }}
+
+            ---
+
+            Changelog completo: [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+          draft: false
+          prerelease: false

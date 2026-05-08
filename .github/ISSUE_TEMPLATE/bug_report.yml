@@ -1,0 +1,76 @@
+name: Bug
+description: Reportar algo que no funciona como debería
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por reportar. Mientras más concreto el reporte, más rápido el
+        diagnóstico. Si el bug es de SUNAT (ej. recibes un código de error que
+        no entiendes), revisa primero `docs/TROUBLESHOOTING.md` y
+        `docs/SUNAT.md` antes de abrir issue.
+
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Qué pasa
+      description: Una o dos frases sobre qué esperabas vs qué viste.
+      placeholder: "Esperaba que el POST devolviera 200 con el comprobante aceptado, pero..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducir
+    attributes:
+      label: Cómo reproducir
+      description: Pasos exactos. Incluye el payload (anonimizado si tiene datos reales).
+      placeholder: |
+        1. Levanto el server con `make run`
+        2. Hago POST /v1/invoices con este body: {...}
+        3. Recibo 502 con detail "..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / output
+      description: Stack trace, mensaje de SUNAT, lo que devolvió el endpoint. Si tiene RUC/DNI reales, anonimízalos.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Versión
+      description: "Output de `git describe --always` o el tag/commit en el que estás."
+      placeholder: "v0.1.0 / 0b8c24b"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ambiente
+    attributes:
+      label: Ambiente
+      options:
+        - Local (uvicorn)
+        - Vercel
+        - Otro (describir abajo)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: SUNAT MODE
+      options:
+        - beta
+        - prod
+    validations:
+      required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Cualquier cosa que ayude — config no estándar, OS, versión Python, etc.

@@ -1,5 +1,11 @@
 # SIS Facturador
 
+[![CI](https://github.com/dukex57/sis-facturador/actions/workflows/ci.yml/badge.svg)](https://github.com/dukex57/sis-facturador/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![License](https://img.shields.io/github/license/dukex57/sis-facturador)](./LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/dukex57/sis-facturador)](https://github.com/dukex57/sis-facturador/commits/main)
+
 API REST para facturar electrónicamente ante SUNAT (Perú), escrita en Python.
 Genera Factura (`01`) y Boleta (`03`) en UBL 2.1, las firma con XMLDSig
 RSA-SHA256, las manda por SOAP al webservice del contribuyente (SEE-DSC) y

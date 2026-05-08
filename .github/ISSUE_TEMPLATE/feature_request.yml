@@ -1,0 +1,54 @@
+name: Feature / Mejora
+description: Proponer una nueva funcionalidad o mejora
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de proponer, revisa el roadmap del README — puede que ya esté
+        planificado.
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qué problema resuelve
+      description: Cuál es el pain actual sin esta feature.
+      placeholder: "Hoy no puedo emitir notas de crédito, tengo que hacerlo desde el portal SUNAT..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      description: Cómo te imaginas la solución. No hace falta que esté completa — un esbozo basta.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+      description: ¿Hay otras formas de resolver esto? ¿Por qué prefieres esta?
+
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: Prioridad para ti
+      options:
+        - Crítica (no puedo seguir sin esto)
+        - Alta (sería muy útil)
+        - Media (estaría bueno tener)
+        - Baja (idea que tengo, sin urgencia)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribuir
+    attributes:
+      label: ¿Te animas a contribuir?
+      options:
+        - label: Estoy dispuesto a abrir un PR para implementarlo
+        - label: Puedo testear cuando esté listo
+        - label: Solo abro la issue para que lo evalúen
