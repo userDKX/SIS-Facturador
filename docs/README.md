@@ -37,7 +37,8 @@ GitHub.
 
 Los snippets son código real del repo. Si en algún punto la doc dice algo
 distinto al código, gana el código — la doc se mantiene sincronizada pero la
-fuente de verdad vive en `app/`.
+fuente de verdad vive en `packages/core/src/pe_invoicing/` (SDK) y
+`packages/api/src/sis_facturador/` (servicio).
 
 Todo está en español porque la audiencia natural es el dev peruano que está
 empezando con SUNAT. Si te resulta útil traducir alguno al inglés para

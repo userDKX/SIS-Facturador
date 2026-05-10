@@ -9,9 +9,13 @@ correrlo es clonar el repo padre y seguir
 
 ## Qué hace
 
-- Expone `POST /v1/invoices` y `GET /v1/invoices/{id}` (FastAPI).
+- Emisión de **factura** (`01`) y **boleta** (`03`): `POST /v1/invoices`,
+  `GET /v1/invoices/{id}` (FastAPI).
+- Emisión de **nota de crédito** (`07`) referenciando una factura/boleta
+  previa: `POST /v1/credit-notes`, `GET /v1/credit-notes/{id}`.
 - Orquesta el pipeline del SDK (build → sign → zip → sendBill → CDR).
-- Persiste comprobantes en Postgres (Supabase).
+- Persiste comprobantes en Postgres (Supabase). Tablas `invoices` y
+  `credit_notes` con FK opcional entre ellas.
 - Sube XML firmado y CDR a Supabase Storage.
 - Healthchecks `/v1/health` y `/v1/health/cert`.
 
@@ -31,9 +35,10 @@ src/sis_facturador/
 ├── main.py            FastAPI app + middleware + healthchecks
 ├── config.py          pydantic-settings (lee .env)
 ├── database.py        SQLAlchemy + psycopg v3
-├── models/            ORM SQLAlchemy
-├── schemas/           Pydantic v2
+├── sunat_runtime.py   caches del SDK (cert, zeep client) leyendo settings
+├── models/            ORM SQLAlchemy (invoice, credit_note)
+├── schemas/           Pydantic v2 (invoice, credit_note)
 ├── services/          orquestación que usa pe_invoicing
-├── routers/           endpoints REST
+├── routers/           endpoints REST (invoices, credit_notes)
 └── storage/           adaptadores local + Supabase Storage
 ```
