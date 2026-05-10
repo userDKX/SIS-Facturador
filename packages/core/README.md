@@ -44,10 +44,54 @@ print(result.status, result.code, result.description)
 # accepted 0 La Factura numero F001-1, ha sido aceptada
 ```
 
+## Notas de crédito
+
+Para anular o modificar una factura/boleta ya emitida, el SDK expone
+`build_creditnote_xml` con su propia plantilla UBL `<CreditNote>`. La NC
+referencia al comprobante original y declara el motivo del catálogo SUNAT
+09. Se manda por el mismo `send_bill` síncrono.
+
+```python
+from pe_invoicing import (
+    CreditNoteInput, ReferenciaDoc, InvoiceLine, Party,
+    build_creditnote_xml, sign_invoice_xml, pack_invoice, send_bill,
+)
+
+nc = CreditNoteInput(
+    serie="FC01", numero=1, fecha_emision=date.today(), moneda="PEN",
+    motivo_codigo="01",                                    # cat. 09: anulación
+    motivo_descripcion="ANULACION DE LA OPERACION",
+    referencia=ReferenciaDoc(tipo_doc="01", serie="F001", numero=1),
+    emisor=emisor, receptor=receptor,
+    lines=[InvoiceLine(codigo="SERV01", descripcion="Servicio",
+                       unidad="ZZ", cantidad=Decimal("1"),
+                       precio_unitario=Decimal("100"))],
+)
+
+xml = build_creditnote_xml(nc)
+signed = sign_invoice_xml(xml, cert)
+zip_bytes = pack_invoice(signed, f"{ruc}-07-FC01-1")
+result = send_bill(client, zip_bytes, f"{ruc}-07-FC01-1.zip")
+```
+
+Motivos válidos del catálogo 09: `"01"` anulación, `"02"` anulación por
+error de RUC, `"03"` corrección por error en descripción, `"04"` descuento
+global, `"05"` descuento por ítem, `"06"` devolución total, `"07"`
+devolución por ítem, `"08"` bonificación, `"09"` disminución del valor,
+`"10"` otros, `"13"` ajuste de montos/fechas de pago.
+
+La serie de la NC sigue el prefijo del documento referenciado: si la NC
+modifica una factura (tipo `01`), la serie debe empezar con `F`; si
+modifica una boleta (tipo `03`), con `B`. SUNAT no acepta cruzar prefijos.
+
+Hay un script ejecutable en `examples/emit_creditnote.py` con el flujo
+completo end-to-end usando solo este SDK.
+
 ## Qué incluye
 
 - `pe_invoicing.ubl` — generación UBL 2.1 con plantillas Jinja2 (factura,
-  boleta) + dataclasses + cálculo de totales + monto en letras.
+  boleta, nota de crédito) + dataclasses + cálculo de totales + monto en
+  letras.
 - `pe_invoicing.signer` — firma XMLDSig RSA-SHA256 con Exclusive C14N.
   Reubica `<ds:Signature>` dentro de `cac:UBLExtensions` como exige SUNAT.
 - `pe_invoicing.sunat` — cliente SOAP `sendBill` sobre `zeep` con WSDLs

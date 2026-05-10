@@ -37,6 +37,9 @@ htmlcov/
 # Storage local de runtime (XMLs firmados, CDRs)
 # Solo en la raiz — no afecta packages/api/src/sis_facturador/storage/ que es modulo Python
 /storage/
+# Storage que se cuela cuando corres uvicorn desde la raiz: el local backend
+# resuelve LOCAL_STORAGE_DIR vacio a una ruta relativa al modulo, no a la raiz.
+packages/api/src/storage/
 
 # IDE
 .vscode/

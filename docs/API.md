@@ -156,6 +156,111 @@ Response: igual al body de respuesta del POST.
 | `200` | Comprobante encontrado                          |
 | `404` | No existe comprobante con ese `id`              |
 
+## Notas de crédito
+
+### `POST /v1/credit-notes`
+
+Emite una nota de crédito (tipo 07) que modifica una factura o boleta
+previa. Mismo flujo síncrono que `/v1/invoices`: arma el UBL `<CreditNote>`,
+firma, sube al storage, manda a SUNAT, persiste el resultado.
+
+#### Body
+
+```json
+{
+  "serie": "FC01",
+  "numero": 1,
+  "fecha_emision": "2026-05-10",
+  "moneda": "PEN",
+  "motivo_codigo": "01",
+  "motivo_descripcion": "ANULACION DE LA OPERACION",
+  "referencia": {
+    "tipo_doc": "01",
+    "serie": "F001",
+    "numero": 123
+  },
+  "receptor": {
+    "tipo_doc": "6",
+    "numero_doc": "20512345678",
+    "razon_social": "EMPRESA EJEMPLO S.A.C.",
+    "direccion": "AV. JAVIER PRADO 1234, SAN ISIDRO, LIMA"
+  },
+  "lines": [
+    {
+      "codigo": "PROD001",
+      "descripcion": "Servicio de consultoría",
+      "unidad": "ZZ",
+      "cantidad": "1.00",
+      "precio_unitario": "100.00",
+      "igv_afectacion": "10"
+    }
+  ]
+}
+```
+
+#### Reglas que valida Pydantic antes de tocar SUNAT
+
+- `serie` con prefijo F (NC de factura) o B (NC de boleta), 4 caracteres.
+- `referencia.tipo_doc`: `"01"` (factura) o `"03"` (boleta).
+- La serie debe coincidir con el prefijo del comprobante referenciado:
+  NC de factura usa `F###`, NC de boleta usa `B###`. Si no coincide,
+  devuelve **422**.
+- `motivo_codigo`: catálogo SUNAT 09 (ver tabla en `docs/SUNAT.md`).
+- `motivo_descripcion`: texto libre (3-250 chars), SUNAT lo muestra en
+  consultas.
+- `lines` debe tener al menos uno (los items que la NC corrige/anula).
+
+#### Códigos de respuesta
+
+| HTTP  | Cuándo                                                              |
+|-------|---------------------------------------------------------------------|
+| `200` | Procesada por SUNAT (ver `status`: `accepted` / `accepted_with_obs` / `rejected`) |
+| `409` | Ya existe una NC con la misma `(ruc, serie, numero)`                |
+| `422` | Payload inválido (ej. serie no coincide con `referencia.tipo_doc`)  |
+| `502` | SUNAT no respondió correctamente                                    |
+
+#### Respuesta exitosa (200)
+
+```json
+{
+  "id": 1,
+  "invoice_id": 42,
+  "ruc_emisor": "20495184120",
+  "tipo_doc": "07",
+  "serie": "FC01",
+  "numero": 1,
+  "fecha_emision": "2026-05-10",
+  "moneda": "PEN",
+  "motivo_codigo": "01",
+  "motivo_descripcion": "ANULACION DE LA OPERACION",
+  "ref_tipo_doc": "01",
+  "ref_serie": "F001",
+  "ref_numero": 123,
+  "subtotal": "100.00",
+  "igv": "18.00",
+  "total": "118.00",
+  "status": "accepted",
+  "sunat_code": "0",
+  "sunat_description": "La Nota de Credito numero FC01-1, ha sido aceptada",
+  "xml_signed_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/xml/20495184120-07-FC01-1.xml",
+  "cdr_xml_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/cdr/R-20495184120-07-FC01-1.xml",
+  "error_message": null
+}
+```
+
+`invoice_id` es `null` cuando el comprobante referenciado no existe en
+la tabla `invoices` (ej. emitido por otro sistema antes de migrar). La NC
+se emite igual — los campos `ref_*` son la fuente de verdad para SUNAT.
+
+### `GET /v1/credit-notes/{credit_note_id}`
+
+Devuelve una NC persistida. Lookup local, no consulta a SUNAT.
+
+| HTTP  | Cuándo                              |
+|-------|-------------------------------------|
+| `200` | Nota de crédito encontrada          |
+| `404` | No existe NC con ese `id`           |
+
 ## Una nota sobre auth
 
 En el modo single-tenant actual, **el API no tiene autenticación**.

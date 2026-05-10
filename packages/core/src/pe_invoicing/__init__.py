@@ -19,22 +19,37 @@ from pe_invoicing.sunat.client import (
     send_bill,
 )
 from pe_invoicing.sunat.packager import pack_invoice, unpack_cdr
-from pe_invoicing.ubl.builder import build_invoice_xml, compute_totals, monto_en_letras
-from pe_invoicing.ubl.models import InvoiceInput, InvoiceLine, InvoiceTotals, Party
+from pe_invoicing.ubl.builder import (
+    build_creditnote_xml,
+    build_invoice_xml,
+    compute_totals,
+    monto_en_letras,
+)
+from pe_invoicing.ubl.models import (
+    CreditNoteInput,
+    InvoiceInput,
+    InvoiceLine,
+    InvoiceTotals,
+    Party,
+    ReferenciaDoc,
+)
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "CertBundle",
+    "CreditNoteInput",
     "InvoiceInput",
     "InvoiceLine",
     "InvoiceTotals",
     "Party",
+    "ReferenciaDoc",
     "SunatError",
     "SunatMode",
     "SunatResult",
     "SunatStatus",
     "__version__",
+    "build_creditnote_xml",
     "build_invoice_xml",
     "build_zeep_client",
     "compute_totals",

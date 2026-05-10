@@ -4,7 +4,12 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from lxml import etree
 
-from pe_invoicing.ubl.models import InvoiceInput, InvoiceLine, InvoiceTotals
+from pe_invoicing.ubl.models import (
+    CreditNoteInput,
+    InvoiceInput,
+    InvoiceLine,
+    InvoiceTotals,
+)
 
 IGV_RATE = Decimal("0.18")
 TWO_DP = Decimal("0.01")
@@ -206,6 +211,38 @@ def build_invoice_xml(inv: InvoiceInput) -> str:
     inserte ahi la firma XMLDSig.
     """
     template = _env.get_template("invoice_01.xml.j2")
+    totals = compute_totals(inv.lines)
+    enriched_lines = [_enrich_line(line, inv.moneda) for line in inv.lines]
+
+    rendered = template.render(
+        inv=inv,
+        lines=enriched_lines,
+        totals={
+            "subtotal": _q(totals.subtotal),
+            "igv": _q(totals.igv),
+            "total": _q(totals.total),
+            "monto_letras": monto_en_letras(totals.total, inv.moneda),
+        },
+    )
+
+    etree.fromstring(rendered.encode("utf-8"))
+    return rendered
+
+
+def build_creditnote_xml(inv: CreditNoteInput) -> str:
+    """Renderiza una CreditNote UBL 2.1 (tipo 07) sin firmar.
+
+    Diferencias UBL respecto a Invoice:
+      * Root <CreditNote> con namespace propio (CreditNote-2).
+      * <cac:DiscrepancyResponse> con motivo del catalogo 09.
+      * <cac:BillingReference> apuntando al doc original (factura o boleta).
+      * Lineas en <cac:CreditNoteLine> con <cbc:CreditedQuantity>.
+      * Sin <cac:PaymentTerms> (no aplica a notas).
+
+    El elemento <ext:ExtensionContent/> queda vacio para que el signer
+    inserte ahi la firma XMLDSig.
+    """
+    template = _env.get_template("creditnote_07.xml.j2")
     totals = compute_totals(inv.lines)
     enriched_lines = [_enrich_line(line, inv.moneda) for line in inv.lines]
 

@@ -195,10 +195,64 @@ El primero apunta al segundo via el atributo `URI` en
 `<cbc:URI>#SignatureSP</cbc:URI>`, que matchea el
 `Id="SignatureSP"` que el signer asigna al `<ds:Signature>` real.
 
+## CreditNote — diferencias con Invoice
+
+Las notas de crédito (tipo `07`) usan otro UBL: `<CreditNote>` en lugar de
+`<Invoice>`, con su propio namespace y un par de elementos adicionales.
+Plantilla en `pe_invoicing/ubl/templates/creditnote_07.xml.j2`,
+constructor `build_creditnote_xml(inv: CreditNoteInput) -> str`.
+
+Diferencias estructurales respecto a `<Invoice>`:
+
+```xml
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" ...>
+  ...
+  <cac:DiscrepancyResponse>                          <!-- obligatorio -->
+    <cbc:ReferenceID>F001-1</cbc:ReferenceID>
+    <cbc:ResponseCode listAgencyName="PE:SUNAT"
+                      listName="Tipo de nota de credito"
+                      listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo09">01</cbc:ResponseCode>
+    <cbc:Description>ANULACION DE LA OPERACION</cbc:Description>
+  </cac:DiscrepancyResponse>
+  <cac:BillingReference>                             <!-- obligatorio -->
+    <cac:InvoiceDocumentReference>
+      <cbc:ID>F001-1</cbc:ID>
+      <cbc:DocumentTypeCode>01</cbc:DocumentTypeCode>
+    </cac:InvoiceDocumentReference>
+  </cac:BillingReference>
+  ...
+  <cac:CreditNoteLine>                               <!-- antes era InvoiceLine -->
+    <cbc:ID>1</cbc:ID>
+    <cbc:CreditedQuantity unitCode="ZZ">1</cbc:CreditedQuantity>
+    ...
+  </cac:CreditNoteLine>
+</CreditNote>
+```
+
+Lo que cambia:
+
+- **Namespace del root**: `CreditNote-2` en lugar de `Invoice-2`.
+- **`DiscrepancyResponse`** (obligatorio): el motivo de la NC del Catálogo 9
+  (ver `docs/SUNAT.md`). `ReferenceID` es el doc original en formato
+  `serie-numero`.
+- **`BillingReference`** (obligatorio): apunta al doc original con su
+  `DocumentTypeCode` (01 factura, 03 boleta).
+- **Líneas en `cac:CreditNoteLine`** (no `cac:InvoiceLine`).
+- **`cbc:CreditedQuantity`** (no `cbc:InvoicedQuantity`).
+- **No lleva `cac:PaymentTerms`** — no aplica a notas.
+- **No lleva `cbc:InvoiceTypeCode`** — el tipo "07" se infiere por el
+  namespace; el cliente lo pone en el filename del ZIP (`{ruc}-07-...`).
+
+La serie sigue el prefijo del comprobante referenciado: NC de factura usa
+`F###`, NC de boleta usa `B###`. SUNAT no acepta cruzar prefijos.
+
 ## El builder, la decisión clave
 
-`pe_invoicing/ubl/builder.py` tiene una sola función pública: `build_invoice_xml(inv:
-InvoiceInput) -> str`. Toda la lógica vive ahí. Decisiones explícitas:
+`pe_invoicing/ubl/builder.py` tiene dos funciones públicas:
+`build_invoice_xml(inv: InvoiceInput) -> str` y
+`build_creditnote_xml(inv: CreditNoteInput) -> str`. Ambas comparten
+helpers (`_enrich_line`, `compute_totals`, `monto_en_letras`) y solo
+difieren en el template Jinja que cargan. Decisiones explícitas:
 
 - **`Decimal` para todos los montos.** No `float`. SUNAT redondea con
   `ROUND_HALF_UP` a 2 decimales — el builder usa `quantize(TWO_DP,
@@ -214,5 +268,6 @@ InvoiceInput) -> str`. Toda la lógica vive ahí. Decisiones explícitas:
 ## Para ver más
 
 - Catálogos de SUNAT: https://cpe.sunat.gob.pe/sites/default/files/inline-files/anexoVIII.pdf
-- Plantilla del builder: `pe_invoicing/ubl/templates/invoice_01.xml.j2`
+- Plantilla de factura/boleta: `pe_invoicing/ubl/templates/invoice_01.xml.j2`
+- Plantilla de nota de crédito: `pe_invoicing/ubl/templates/creditnote_07.xml.j2`
 - Validador online de SUNAT (útil para depurar): https://e-factura.sunat.gob.pe/cl-ti-itcpfegem-beta/billService

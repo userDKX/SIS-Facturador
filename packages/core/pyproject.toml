@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pe-invoicing"
-version = "0.1.0"
-description = "SDK Python para emitir comprobantes electrónicos a SUNAT (Perú): UBL 2.1, XMLDSig RSA-SHA256, SOAP sendBill. Sin opinión sobre HTTP ni persistencia."
+version = "0.2.0"
+description = "SDK Python para emitir comprobantes electrónicos a SUNAT (Perú): factura, boleta, nota de crédito. UBL 2.1, XMLDSig RSA-SHA256, SOAP sendBill. Sin opinión sobre HTTP ni persistencia."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -21,6 +21,7 @@ keywords = [
     "peru",
     "factura-electronica",
     "boleta-electronica",
+    "nota-credito",
     "sdk",
 ]
 classifiers = [

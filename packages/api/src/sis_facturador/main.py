@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from sis_facturador import __version__
+from sis_facturador.routers import credit_notes as credit_notes_router
 from sis_facturador.routers import invoices as invoices_router
 from sis_facturador.sunat_runtime import get_cert
 
@@ -13,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 DESCRIPTION = """
 API REST para emitir comprobantes electrónicos a SUNAT (Perú): Factura
-(`01`) y Boleta de venta (`03`). Genera UBL 2.1, firma con XMLDSig
-RSA-SHA256, envía por SOAP al WS del contribuyente (SEE-DSC) y devuelve el
-CDR.
+(`01`), Boleta de venta (`03`) y Nota de crédito (`07`). Genera UBL 2.1,
+firma con XMLDSig RSA-SHA256, envía por SOAP al WS del contribuyente
+(SEE-DSC) y devuelve el CDR.
 
 Documentación completa en el [repositorio](https://github.com/userDKX/SIS-Facturador):
 
@@ -35,6 +36,14 @@ TAGS_METADATA = [
         "description": (
             "Emisión y consulta de comprobantes electrónicos. "
             "POST `/v1/invoices` arma el UBL, firma, envía a SUNAT y persiste."
+        ),
+    },
+    {
+        "name": "credit-notes",
+        "description": (
+            "Emisión y consulta de notas de crédito (tipo 07). "
+            "POST `/v1/credit-notes` referencia una factura/boleta previa y "
+            "declara el motivo del catálogo SUNAT 09."
         ),
     },
 ]
@@ -126,4 +135,10 @@ app.include_router(
     invoices_router.router,
     prefix="/v1/invoices",
     tags=["invoices"],
+)
+
+app.include_router(
+    credit_notes_router.router,
+    prefix="/v1/credit-notes",
+    tags=["credit-notes"],
 )

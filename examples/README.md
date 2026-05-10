@@ -9,6 +9,8 @@ Carpeta con payloads y scripts listos para usar contra el API.
 | `factura.json`                   | Factura tipo `01` con dos líneas, receptor RUC                       |
 | `boleta.json`                    | Boleta tipo `03` con receptor DNI                                    |
 | `boleta_consumidor_final.json`   | Boleta a "consumidor final" (`schemeID=0`, sin doc — solo boletas)   |
+| `nota_credito_factura.json`      | Nota de crédito tipo `07` motivo `01` (anulación) contra una factura |
+| `nota_credito_boleta.json`       | Nota de crédito tipo `07` motivo `06` (devolución total) contra una boleta |
 
 ## Scripts y snippets
 

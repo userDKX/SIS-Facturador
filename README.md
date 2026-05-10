@@ -7,9 +7,9 @@
 [![Last commit](https://img.shields.io/github/last-commit/userDKX/SIS-Facturador)](https://github.com/userDKX/SIS-Facturador/commits/main)
 
 API REST para facturar electrónicamente ante SUNAT (Perú), escrita en Python.
-Genera Factura (`01`) y Boleta (`03`) en UBL 2.1, las firma con XMLDSig
-RSA-SHA256, las manda por SOAP al webservice del contribuyente (SEE-DSC) y
-guarda el CDR aceptado.
+Genera Factura (`01`), Boleta (`03`) y Nota de Crédito (`07`) en UBL 2.1, las
+firma con XMLDSig RSA-SHA256, las manda por SOAP al webservice del
+contribuyente (SEE-DSC) y guarda el CDR aceptado.
 
 Está corriendo en producción real desde el 2026-05-08.
 
@@ -142,10 +142,10 @@ Ya hecho:
 
 - Factura tipo `01` end-to-end (validada en prod)
 - Boleta tipo `03` end-to-end (validada en prod)
+- Nota de Crédito tipo `07` end-to-end
 
 Por hacer:
 
-- Nota de Crédito (`07`)
 - Nota de Débito (`08`)
 - Comunicación de baja (sendSummary async + Vercel Cron)
 - Resumen diario de boletas
@@ -196,9 +196,9 @@ encima del SDK: agrega HTTP, persistencia, storage y deploy.
 ## Contribuir
 
 Si encuentras un bug, una observación INFO de SUNAT que no documentamos, o
-quieres agregar Notas de Crédito antes que yo — abre un issue o un PR. La
-gente que más puede ayudar es quien ya peleó con esto antes y se acuerda de
-los detalles raros del SOL.
+quieres agregar Notas de Débito o Comunicación de Baja antes que yo — abre
+un issue o un PR. La gente que más puede ayudar es quien ya peleó con esto
+antes y se acuerda de los detalles raros del SOL.
 
 ## Quién mantiene esto
 

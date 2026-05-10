@@ -24,3 +24,15 @@ echo "== Emitiendo boleta desde examples/boleta.json =="
 curl -sS -X POST "$BASE_URL/v1/invoices" \
     -H "Content-Type: application/json" \
     -d @"$(dirname "$0")/boleta.json" | python -m json.tool
+echo
+
+echo "== Emitiendo NC de factura desde examples/nota_credito_factura.json =="
+curl -sS -X POST "$BASE_URL/v1/credit-notes" \
+    -H "Content-Type: application/json" \
+    -d @"$(dirname "$0")/nota_credito_factura.json" | python -m json.tool
+echo
+
+echo "== Emitiendo NC de boleta desde examples/nota_credito_boleta.json =="
+curl -sS -X POST "$BASE_URL/v1/credit-notes" \
+    -H "Content-Type: application/json" \
+    -d @"$(dirname "$0")/nota_credito_boleta.json" | python -m json.tool

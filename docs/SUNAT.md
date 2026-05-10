@@ -221,11 +221,32 @@ Los catálogos de SUNAT (versiones que están en uso al 2026-05):
 - **Catálogo 1**: tipos de documento (`01` factura, `03` boleta, `07` NC, `08` ND)
 - **Catálogo 6**: tipos de documento de identidad (`1` DNI, `4` CE, `6` RUC, `7` pasaporte, `0` sin doc)
 - **Catálogo 7**: afectación del IGV (`10`, `20`, `30`, …)
+- **Catálogo 9**: tipos de Nota de Crédito (ver tabla abajo)
+- **Catálogo 10**: tipos de Nota de Débito
 - **Catálogo 51**: tipo de operación (`0101` venta interna, …)
-- **Catálogo 52**: motivos de Nota de Crédito (`01` anulación, `02` corrección, …)
 
 URL del anexo VIII (donde están todos):
 https://cpe.sunat.gob.pe/sites/default/files/inline-files/anexoVIII.pdf
+
+### Catálogo 9 — motivos de Nota de Crédito
+
+Es el código que va en `<cbc:ResponseCode>` dentro de `<cac:DiscrepancyResponse>`
+del UBL `<CreditNote>`. En el API del SIS Facturador es el campo `motivo_codigo`
+del `POST /v1/credit-notes`.
+
+| Código | Motivo                                            | Cuándo se usa                                                  |
+|--------|---------------------------------------------------|----------------------------------------------------------------|
+| `01`   | Anulación de la operación                         | El comprobante completo se anula (cliente desistió, error)     |
+| `02`   | Anulación por error en el RUC                     | Se emitió al RUC equivocado                                    |
+| `03`   | Corrección por error en la descripción            | Cambia descripción del ítem sin cambiar montos                 |
+| `04`   | Descuento global                                  | Descuento sobre el total del comprobante                       |
+| `05`   | Descuento por ítem                                | Descuento sobre líneas específicas                             |
+| `06`   | Devolución total                                  | El cliente devolvió toda la mercadería                         |
+| `07`   | Devolución por ítem                               | Devolución parcial (algunos items)                             |
+| `08`   | Bonificación                                      | Bonificación posterior a la venta                              |
+| `09`   | Disminución en el valor                           | Ajuste a la baja del valor original                            |
+| `10`   | Otros conceptos                                   | Catch-all (preferir códigos específicos cuando aplique)        |
+| `13`   | Ajuste — montos y/o fechas de pago                | Modificación de condiciones de pago (operaciones a crédito)    |
 
 ## Diagnóstico cuando algo se rompe
 

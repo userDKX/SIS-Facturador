@@ -6,6 +6,30 @@ Cambios relevantes del **SIS Facturador**. Sigue el formato de
 
 ## [Sin publicar]
 
+### Agregado
+
+- **Notas de crédito (tipo 07)** end-to-end. Anula o ajusta una factura/boleta
+  previa con el catálogo de motivos 9 de SUNAT.
+  - SDK `pe-invoicing` 0.2.0: `CreditNoteInput`, `ReferenciaDoc`,
+    `build_creditnote_xml`, plantilla UBL `creditnote_07.xml.j2` y ejemplo
+    standalone `packages/core/examples/emit_creditnote.py`.
+  - Servicio: tabla `credit_notes` con FK opcional a `invoices`, schemas
+    Pydantic con validación serie↔referencia, endpoints `POST /v1/credit-notes`
+    y `GET /v1/credit-notes/{id}`.
+  - Reusa toda la infra existente: firma XMLDSig, packaging ZIP, cliente SOAP
+    `sendBill`, storage Supabase y cache de cert.
+  - Tests unit del builder, integration beta y e2e del endpoint.
+  - Migración SQL `migrations/002_credit_notes.sql`.
+- Documentación: sección NC en `docs/API.md`, `docs/UBL.md` (diferencias
+  Invoice vs CreditNote) y tabla del catálogo 9 en `docs/SUNAT.md`.
+- Ejemplos: `examples/nota_credito_factura.json`, `examples/nota_credito_boleta.json`,
+  bloques en `curl_examples.sh` y `request.http`.
+
+### Corregido
+
+- `docs/SUNAT.md` listaba el "catálogo 52" como motivos de NC; el correcto es
+  el catálogo 9.
+
 ## [0.1.0] - 2026-05-08
 
 Primer release público. El pipeline ya emitió comprobantes reales en

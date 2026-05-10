@@ -62,3 +62,74 @@ Content-Type: application/json
 
 ### Consultar comprobante por ID
 GET http://localhost:8000/v1/invoices/1
+
+### Emitir nota de crédito de factura
+# Cuerpo en examples/nota_credito_factura.json
+POST http://localhost:8000/v1/credit-notes
+Content-Type: application/json
+
+{
+  "serie": "FC01",
+  "numero": 1,
+  "fecha_emision": "2026-05-10",
+  "moneda": "PEN",
+  "motivo_codigo": "01",
+  "motivo_descripcion": "ANULACION DE LA OPERACION",
+  "referencia": {
+    "tipo_doc": "01",
+    "serie": "F001",
+    "numero": 123
+  },
+  "receptor": {
+    "tipo_doc": "6",
+    "numero_doc": "20512345678",
+    "razon_social": "EMPRESA EJEMPLO S.A.C.",
+    "direccion": "AV. JAVIER PRADO 1234, SAN ISIDRO, LIMA"
+  },
+  "lines": [
+    {
+      "codigo": "PROD001",
+      "descripcion": "Servicio de consultoria",
+      "unidad": "ZZ",
+      "cantidad": "1.00",
+      "precio_unitario": "100.00",
+      "igv_afectacion": "10"
+    }
+  ]
+}
+
+### Emitir nota de crédito de boleta (devolución total)
+POST http://localhost:8000/v1/credit-notes
+Content-Type: application/json
+
+{
+  "serie": "BC01",
+  "numero": 1,
+  "fecha_emision": "2026-05-10",
+  "moneda": "PEN",
+  "motivo_codigo": "06",
+  "motivo_descripcion": "DEVOLUCION TOTAL",
+  "referencia": {
+    "tipo_doc": "03",
+    "serie": "B001",
+    "numero": 456
+  },
+  "receptor": {
+    "tipo_doc": "1",
+    "numero_doc": "12345678",
+    "razon_social": "JUAN PEREZ MENDOZA"
+  },
+  "lines": [
+    {
+      "codigo": "ART01",
+      "descripcion": "Polo manga corta",
+      "unidad": "NIU",
+      "cantidad": "2.00",
+      "precio_unitario": "25.00",
+      "igv_afectacion": "10"
+    }
+  ]
+}
+
+### Consultar nota de crédito por ID
+GET http://localhost:8000/v1/credit-notes/1

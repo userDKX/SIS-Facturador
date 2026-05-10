@@ -59,3 +59,50 @@ def sample_invoice_input():
         receptor=receptor,
         lines=lines,
     )
+
+
+@pytest.fixture
+def sample_creditnote_input():
+    """CreditNoteInput valido para tests unit (no toca SUNAT)."""
+    from pe_invoicing import (
+        CreditNoteInput,
+        InvoiceLine,
+        Party,
+        ReferenciaDoc,
+    )
+
+    emisor = Party(
+        tipo_doc="6",
+        numero_doc="20000000001",
+        razon_social="EMPRESA TEST SAC",
+        direccion="AV TEST 123 LIMA LIMA",
+        ubigeo="150101",
+    )
+    receptor = Party(
+        tipo_doc="6",
+        numero_doc="20100070970",
+        razon_social="CLIENTE TEST SAC",
+        direccion="AV CLIENTE 456",
+    )
+    lines = [
+        InvoiceLine(
+            codigo="P001",
+            descripcion="PRODUCTO TEST",
+            unidad="NIU",
+            cantidad=Decimal("1"),
+            precio_unitario=Decimal("100.00"),
+            igv_afectacion="10",
+        ),
+    ]
+    return CreditNoteInput(
+        serie="FC01",
+        numero=1,
+        fecha_emision=date(2026, 5, 10),
+        moneda="PEN",
+        motivo_codigo="01",
+        motivo_descripcion="ANULACION DE LA OPERACION",
+        referencia=ReferenciaDoc(tipo_doc="01", serie="F001", numero=1),
+        emisor=emisor,
+        receptor=receptor,
+        lines=lines,
+    )

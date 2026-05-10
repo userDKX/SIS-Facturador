@@ -64,3 +64,52 @@ class InvoiceInput:
     receptor: Party
     lines: list[InvoiceLine]
     tipo_documento: str = "01"
+
+
+@dataclass(frozen=True)
+class ReferenciaDoc:
+    """Referencia al comprobante original que la nota de credito modifica.
+
+    tipo_doc: catalogo SUNAT 01 (Tipo de Documento)
+        "01" = Factura (la NC usara serie F###)
+        "03" = Boleta de venta (la NC usara serie B###)
+    """
+
+    tipo_doc: str
+    serie: str
+    numero: int
+
+
+@dataclass(frozen=True)
+class CreditNoteInput:
+    """Nota de credito (tipo 07) que modifica una factura o boleta previa.
+
+    motivo_codigo: catalogo SUNAT 09 (Tipo de Nota de Credito Electronica)
+        "01" = Anulacion de la operacion
+        "02" = Anulacion por error en el RUC
+        "03" = Correccion por error en la descripcion
+        "04" = Descuento global
+        "05" = Descuento por item
+        "06" = Devolucion total
+        "07" = Devolucion por item
+        "08" = Bonificacion
+        "09" = Disminucion en el valor
+        "10" = Otros conceptos
+        "13" = Ajuste - montos y/o fechas de pago
+
+    La serie de la NC sigue el prefijo del documento referenciado:
+    factura (01) -> serie F###; boleta (03) -> serie B###. SUNAT no acepta
+    cruzar prefijos.
+    """
+
+    serie: str
+    numero: int
+    fecha_emision: date
+    moneda: str
+    motivo_codigo: str
+    motivo_descripcion: str
+    referencia: ReferenciaDoc
+    emisor: Party
+    receptor: Party
+    lines: list[InvoiceLine]
+    tipo_documento: str = "07"
