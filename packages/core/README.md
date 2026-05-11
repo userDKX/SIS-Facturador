@@ -1,5 +1,7 @@
 # sunat-py
 
+[![PyPI](https://img.shields.io/pypi/v/sunat-py.svg)](https://pypi.org/project/sunat-py/)
+
 SDK Python para emitir comprobantes electrónicos a SUNAT. Builders
 UBL 2.1, firma XMLDSig, clientes SOAP (factura/boleta/NC/ND, baja y
 resumen) y REST (GRE remitente). Validaciones previas: RUC con DV
