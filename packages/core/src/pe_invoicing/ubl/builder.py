@@ -6,6 +6,8 @@ from lxml import etree
 
 from pe_invoicing.ubl.models import (
     CreditNoteInput,
+    DespatchAdviceInput,
+    GRLine,
     InvoiceInput,
     InvoiceLine,
     InvoiceTotals,
@@ -255,6 +257,42 @@ def build_creditnote_xml(inv: CreditNoteInput) -> str:
             "total": _q(totals.total),
             "monto_letras": monto_en_letras(totals.total, inv.moneda),
         },
+    )
+
+    etree.fromstring(rendered.encode("utf-8"))
+    return rendered
+
+
+def _enrich_grline(line: GRLine) -> dict:
+    return {
+        "codigo": line.codigo,
+        "descripcion": line.descripcion,
+        "unidad": line.unidad,
+        "cantidad": str(line.cantidad),
+    }
+
+
+def build_despatchadvice_xml(inv: DespatchAdviceInput) -> str:
+    """Renderiza un DespatchAdvice UBL 2.1 (tipo 09) sin firmar.
+
+    Diferencias UBL respecto a Invoice/CreditNote:
+      * Root <DespatchAdvice> con namespace DespatchAdvice-2.
+      * Sin valores monetarios: no TaxTotal, no LegalMonetaryTotal.
+      * Datos de traslado en <cac:Shipment>: motivo, modalidad, peso, rutas.
+      * Lineas en <cac:DespatchLine> con <cbc:DeliveredQuantity>.
+      * Destinatario en <cac:DeliveryCustomerParty> (no AccountingCustomerParty).
+      * Emisor/remitente en <cac:DespatchSupplierParty>.
+
+    El elemento <ext:ExtensionContent/> queda vacio para que el signer
+    inserte ahi la firma XMLDSig.
+    """
+    template = _env.get_template("despatchadvice_09.xml.j2")
+    enriched_lines = [_enrich_grline(line) for line in inv.lines]
+
+    rendered = template.render(
+        inv=inv,
+        lines=enriched_lines,
+        peso_bruto=_q(inv.peso_bruto_total),
     )
 
     etree.fromstring(rendered.encode("utf-8"))

@@ -8,6 +8,28 @@ Cambios relevantes del **SIS Facturador**. Sigue el formato de
 
 ### Agregado
 
+- **Guía de Remisión Remitente (tipo 09)** end-to-end por la **Nueva GRE REST**
+  (`api-cpe.sunat.gob.pe`). Verificada en producción 2026-05-11 con
+  `accepted` / code 0.
+  - SDK `pe-invoicing` 0.3.0: `DespatchAdviceInput`, `DireccionTraslado`,
+    `GRLine`, `Transportista`, `Conductor`, `Vehiculo`,
+    `build_despatchadvice_xml`, plantilla UBL `despatchadvice_09.xml.j2`
+    siguiendo la estructura GRE 2.0 (`cac:Delivery/cac:Despatch/cac:DespatchAddress`
+    anidado, `cbc:AddressTypeCode` con `listID=RUC` para `cod_local`,
+    `cac:TransitPeriod/cbc:StartDate`).
+  - Nuevo cliente REST `pe_invoicing.sunat.gre_client`: OAuth2 `password`
+    grant contra `api-seguridad.sunat.gob.pe/v1/clientessol`, POST de envío
+    contra `api-cpe.sunat.gob.pe/v1/contribuyente/gem/comprobantes/{filename}`
+    (sin `.zip`) y polling de CDR por `numTicket`.
+  - Servicio: tabla `despatch_advices`, schemas Pydantic con validación
+    modalidad↔conductor/transportista, endpoints `POST /v1/despatch-advices`
+    y `GET /v1/despatch-advices/{id}`.
+  - Settings: `GRE_CLIENT_ID` / `GRE_CLIENT_SECRET` (Credenciales API SUNAT,
+    independientes del usuario SOL del SEE-DSC).
+  - Tests unit del builder, e2e del endpoint, migración SQL
+    `migrations/003_despatch_advices.sql`, script
+    `scripts/sendbill_prod_despatch.py --confirm-real`.
+
 - **Notas de crédito (tipo 07)** end-to-end. Anula o ajusta una factura/boleta
   previa con el catálogo de motivos 9 de SUNAT.
   - SDK `pe-invoicing` 0.2.0: `CreditNoteInput`, `ReferenciaDoc`,
@@ -29,6 +51,23 @@ Cambios relevantes del **SIS Facturador**. Sigue el formato de
 
 - `docs/SUNAT.md` listaba el "catálogo 52" como motivos de NC; el correcto es
   el catálogo 9.
+
+### Gotchas GRE 2.0 documentados (resueltos en el código)
+
+- El endpoint GRE no admite el `.zip` en el path: va el `filename_base` "pelado".
+- La fecha de emisión la valida contra el reloj de Lima (UTC-5). El script
+  prod usa `datetime.now(LIMA_TZ).date()` para no caer en `2329` cuando la
+  máquina corre en otra zona horaria.
+- `cac:Delivery/cac:Despatch/cac:DespatchAddress` (no `cac:OriginAddress`)
+  es la ubicación correcta del punto de partida en SUNAT GRE 2.0.
+- `cbc:AddressTypeCode` con `listID="{RUC}"` y valor `cod_local` es obligatorio
+  para motivo `04` (entre establecimientos) — error `3365` si falta.
+- El DNI del conductor lo cruza con RENIEC en tiempo real (`3359` si no existe).
+- Las placas no aceptan guion ni ceros a la izquierda: `ABC123` ✓ vs `ABC-001`
+  ✗ (`2567`).
+- La licencia del conductor es obligatoria para modalidad `02` (`2572`).
+- El scope OAuth2 es literal `"https://api-cpe.sunat.gob.pe"` aunque el
+  endpoint también sea ese — no se reemplaza por URL real.
 
 ## [0.1.0] - 2026-05-08
 

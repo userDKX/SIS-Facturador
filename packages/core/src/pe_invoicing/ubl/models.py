@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
 
@@ -113,3 +115,110 @@ class CreditNoteInput:
     receptor: Party
     lines: list[InvoiceLine]
     tipo_documento: str = "07"
+
+
+# ---------------------------------------------------------------------------
+# Guia de Remision Remitente (tipo 09)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class DireccionTraslado:
+    """Punto de partida o llegada en la guia de remision.
+
+    ubigeo: codigo de ubigeo INEI de 6 digitos (ej. "150101" = Lima Cercado).
+    cod_local: codigo del establecimiento anexo SUNAT (4 digitos).
+        "0000" = casa matriz; "0001"+ = anexos registrados.
+        Requerido por SUNAT para motivo de traslado 04 (entre establecimientos
+        de la misma empresa) — error 3365 si falta.
+    """
+
+    ubigeo: str
+    direccion: str
+    cod_local: str = ""
+
+
+@dataclass(frozen=True)
+class GRLine:
+    """Linea de detalle de la guia de remision (sin valores monetarios)."""
+
+    codigo: str
+    descripcion: str
+    unidad: str
+    cantidad: Decimal
+
+
+@dataclass(frozen=True)
+class Transportista:
+    """Empresa transportista para modalidad de transporte publico (01).
+
+    numero_doc: RUC (11 digitos) del transportista registrado en MTC.
+    """
+
+    numero_doc: str
+    razon_social: str
+
+
+@dataclass(frozen=True)
+class Conductor:
+    """Conductor del vehiculo para transporte privado (02) o complementario.
+
+    tipo_doc: catalogo SUNAT 06 — tipicamente "1" (DNI).
+    licencia: numero de licencia de conducir vigente (SUNAT lo exige para GR
+    modalidad 02 privada — error 2572).
+    """
+
+    tipo_doc: str
+    numero_doc: str
+    nombres: str = ""
+    apellidos: str = ""
+    licencia: str = ""
+
+
+@dataclass(frozen=True)
+class Vehiculo:
+    """Vehiculo que realiza el traslado."""
+
+    placa: str
+
+
+@dataclass(frozen=True)
+class DespatchAdviceInput:
+    """Guia de remision remitente (tipo 09).
+
+    modalidad: catalogo SUNAT 18 (Modalidad de Traslado)
+        "01" = Transporte publico  -> requiere transportista
+        "02" = Transporte privado  -> requiere conductor + vehiculo
+
+    motivo_traslado: catalogo SUNAT 20 (Motivo de Traslado)
+        "01" = Venta
+        "02" = Compra
+        "04" = Traslado entre establecimientos de la misma empresa
+        "08" = Importacion
+        "09" = Exportacion
+        "13" = Otros
+
+    peso_bruto_unidad: "KGM" (kilogramos, valor por defecto SUNAT)
+    """
+
+    serie: str
+    numero: int
+    fecha_emision: date
+    motivo_traslado: str
+    motivo_descripcion: str
+    modalidad: str
+    peso_bruto_total: Decimal
+    peso_bruto_unidad: str
+    emisor: Party
+    destinatario: Party
+    partida: DireccionTraslado
+    llegada: DireccionTraslado
+    lines: list[GRLine]
+    tipo_documento: str = "09"
+    numero_bultos: int | None = None
+    transportista: Transportista | None = None
+    conductor: Conductor | None = None
+    vehiculo: Vehiculo | None = None
+    # Fecha de inicio del traslado (cac:Delivery/cac:Despatch/cbc:ActualDespatchDate).
+    # Obligatoria para SUNAT — si no se pasa, se usa fecha_emision.
+    fecha_inicio_traslado: date | None = None

@@ -106,3 +106,64 @@ def sample_creditnote_input():
         receptor=receptor,
         lines=lines,
     )
+
+
+@pytest.fixture
+def sample_despatchadvice_input():
+    """DespatchAdviceInput valido para tests unit — modalidad privada (no toca SUNAT)."""
+    from pe_invoicing import (
+        Conductor,
+        DespatchAdviceInput,
+        DireccionTraslado,
+        GRLine,
+        Party,
+        Vehiculo,
+    )
+
+    emisor = Party(
+        tipo_doc="6",
+        numero_doc="20000000001",
+        razon_social="EMPRESA TEST SAC",
+        direccion="AV TEST 123 LIMA",
+        ubigeo="150101",
+    )
+    destinatario = Party(
+        tipo_doc="6",
+        numero_doc="20100070970",
+        razon_social="CLIENTE TEST SAC",
+        direccion="AV CLIENTE 456",
+    )
+    lines = [
+        GRLine(
+            codigo="P001",
+            descripcion="PRODUCTO TEST",
+            unidad="NIU",
+            cantidad=Decimal("5"),
+        ),
+    ]
+    return DespatchAdviceInput(
+        serie="T001",
+        numero=1,
+        fecha_emision=date(2026, 5, 11),
+        motivo_traslado="01",
+        motivo_descripcion="VENTA",
+        modalidad="02",
+        peso_bruto_total=Decimal("10.00"),
+        peso_bruto_unidad="KGM",
+        emisor=emisor,
+        destinatario=destinatario,
+        partida=DireccionTraslado(
+            ubigeo="150101", direccion="AV TEST 123 LIMA", cod_local="0000"
+        ),
+        llegada=DireccionTraslado(ubigeo="150122", direccion="AV CLIENTE 456"),
+        lines=lines,
+        numero_bultos=2,
+        conductor=Conductor(
+            tipo_doc="1",
+            numero_doc="12345678",
+            nombres="JUAN",
+            apellidos="PEREZ",
+            licencia="Q12345678",
+        ),
+        vehiculo=Vehiculo(placa="ABC123"),
+    )

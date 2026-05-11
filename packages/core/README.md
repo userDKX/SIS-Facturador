@@ -1,8 +1,9 @@
 # pe-invoicing
 
-SDK Python para emitir comprobantes electrónicos a SUNAT (Perú). Construye
-UBL 2.1, firma con XMLDSig RSA-SHA256, manda por SOAP al webservice del
-contribuyente y devuelve el CDR.
+SDK Python para emitir comprobantes electrónicos a SUNAT (Perú). Soporta
+factura (`01`), boleta (`03`), nota de crédito (`07`) y guía de remisión
+remitente (`09`). Construye UBL 2.1, firma con XMLDSig RSA-SHA256 y manda
+al webservice de SUNAT (SOAP para CPE, REST para GRE) devolviendo el CDR.
 
 Sin opinión sobre HTTP ni persistencia: lo importas en tu código y decides
 cómo usarlo.
@@ -87,15 +88,87 @@ modifica una boleta (tipo `03`), con `B`. SUNAT no acepta cruzar prefijos.
 Hay un script ejecutable en `examples/emit_creditnote.py` con el flujo
 completo end-to-end usando solo este SDK.
 
+## Guía de remisión remitente (tipo 09)
+
+A diferencia de las CPE, SUNAT migró las GR a una **REST nueva**
+(`api-cpe.sunat.gob.pe`) con OAuth2 password. El SDK provee
+`build_despatchadvice_xml` para el UBL `<DespatchAdvice>` (sin valores
+monetarios) y `get_gre_token` + `send_gre` como cliente REST.
+
+```python
+from datetime import date
+from decimal import Decimal
+from pe_invoicing import (
+    Conductor, DespatchAdviceInput, DireccionTraslado, GRLine, Party, Vehiculo,
+    build_despatchadvice_xml, sign_invoice_xml, pack_invoice,
+    get_gre_token, send_gre, load_cert_from_base64,
+)
+
+cert = load_cert_from_base64(cert_b64, cert_password)
+
+gr = DespatchAdviceInput(
+    serie="T001", numero=1, fecha_emision=date.today(),
+    motivo_traslado="01",                     # cat. 20: 01 venta, 04 entre establec., ...
+    motivo_descripcion="VENTA",
+    modalidad="02",                           # cat. 18: 01 público, 02 privado
+    peso_bruto_total=Decimal("10.00"), peso_bruto_unidad="KGM",
+    emisor=Party(tipo_doc="6", numero_doc=ruc, razon_social="MI EMPRESA SAC"),
+    destinatario=Party(tipo_doc="6", numero_doc="20512345678",
+                       razon_social="CLIENTE SAC", direccion="AV LIMA 456"),
+    partida=DireccionTraslado(ubigeo="150101", direccion="AV PRINCIPAL 123",
+                              cod_local="0000"),    # 0000=casa matriz, 0001+=anexos
+    llegada=DireccionTraslado(ubigeo="150122", direccion="AV LIMA 456"),
+    lines=[GRLine(codigo="P001", descripcion="Producto",
+                  unidad="NIU", cantidad=Decimal("5"))],
+    conductor=Conductor(tipo_doc="1", numero_doc="12345678",
+                        nombres="JUAN", apellidos="PEREZ",
+                        licencia="Q12345678"),     # numero de licencia vigente
+    vehiculo=Vehiculo(placa="ABC123"),
+    numero_bultos=2,
+)
+
+xml = build_despatchadvice_xml(gr)
+signed = sign_invoice_xml(xml, cert)
+zip_bytes = pack_invoice(signed, f"{ruc}-09-T001-1")
+
+token = get_gre_token(client_id=gre_client_id, client_secret=gre_client_secret,
+                      ruc=ruc, username=sol_user, password=sol_password)
+result = send_gre(token=token, ruc=ruc, zip_bytes=zip_bytes,
+                  filename_base=f"{ruc}-09-T001-1")
+
+print(result.status, result.code, result.description)
+# accepted 0 Aceptado
+```
+
+**Credenciales API GRE**: el `client_id`/`client_secret` se generan en SOL
+> *Empresas > Comprobantes de Pago > SEE > Credenciales API SUNAT*. Son
+independientes del usuario SOL del SEE-DSC.
+
+**Reglas SUNAT que vale la pena saber**:
+
+- `cod_local` (catálogo SUNAT establecimientos anexos) es obligatorio para
+  el punto de partida cuando el motivo es `04` (traslado entre
+  establecimientos). Usa `"0000"` para casa matriz.
+- El DNI del conductor se valida contra RENIEC en tiempo real. Si no
+  existe, SUNAT rechaza con error `3359`.
+- Las placas no aceptan guion: `ABC123` ✓, `ABC-001` ✗ (error `2567`).
+- La licencia de conducir es obligatoria para modalidad `02` (privada)
+  — error `2572` si falta.
+- Fecha de emisión: la valida contra el reloj de Lima (UTC-5). Si tu
+  máquina está en otra TZ, usa `datetime.now(tz=...).date()` con la zona
+  correcta para no caer en error `2329`.
+
 ## Qué incluye
 
 - `pe_invoicing.ubl` — generación UBL 2.1 con plantillas Jinja2 (factura,
-  boleta, nota de crédito) + dataclasses + cálculo de totales + monto en
-  letras.
+  boleta, nota de crédito, guía de remisión) + dataclasses + cálculo de
+  totales + monto en letras.
 - `pe_invoicing.signer` — firma XMLDSig RSA-SHA256 con Exclusive C14N.
   Reubica `<ds:Signature>` dentro de `cac:UBLExtensions` como exige SUNAT.
-- `pe_invoicing.sunat` — cliente SOAP `sendBill` sobre `zeep` con WSDLs
-  bundleados localmente (evita rate-limit de SUNAT). Decodifica CDR.
+- `pe_invoicing.sunat.client` — cliente SOAP `sendBill` sobre `zeep` con
+  WSDLs bundleados localmente. Para factura/boleta/NC.
+- `pe_invoicing.sunat.gre_client` — cliente REST OAuth2 para la Nueva GRE
+  (api-cpe.sunat.gob.pe). Envío + polling de CDR.
 - `pe_invoicing.security` — carga del cert `.pfx` desde base64 (env var).
 
 ## Qué NO incluye

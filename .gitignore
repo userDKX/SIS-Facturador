@@ -45,6 +45,7 @@ packages/api/src/storage/
 .vscode/
 .idea/
 *.swp
+.claude/
 
 # OS
 .DS_Store

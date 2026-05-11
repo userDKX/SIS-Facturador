@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 from sis_facturador import __version__
 from sis_facturador.routers import credit_notes as credit_notes_router
+from sis_facturador.routers import despatch_advice as despatch_advice_router
 from sis_facturador.routers import invoices as invoices_router
 from sis_facturador.sunat_runtime import get_cert
 
@@ -14,9 +15,10 @@ logger = logging.getLogger(__name__)
 
 DESCRIPTION = """
 API REST para emitir comprobantes electrónicos a SUNAT (Perú): Factura
-(`01`), Boleta de venta (`03`) y Nota de crédito (`07`). Genera UBL 2.1,
-firma con XMLDSig RSA-SHA256, envía por SOAP al WS del contribuyente
-(SEE-DSC) y devuelve el CDR.
+(`01`), Boleta de venta (`03`), Nota de crédito (`07`) y Guía de remisión
+remitente (`09`). Genera UBL 2.1, firma con XMLDSig RSA-SHA256 y devuelve
+el CDR de SUNAT. Las facturas/boletas/NC van por SOAP (`billService`); las
+GR usan la Nueva GRE REST (`api-cpe.sunat.gob.pe`).
 
 Documentación completa en el [repositorio](https://github.com/userDKX/SIS-Facturador):
 
@@ -44,6 +46,14 @@ TAGS_METADATA = [
             "Emisión y consulta de notas de crédito (tipo 07). "
             "POST `/v1/credit-notes` referencia una factura/boleta previa y "
             "declara el motivo del catálogo SUNAT 09."
+        ),
+    },
+    {
+        "name": "despatch-advices",
+        "description": (
+            "Emisión y consulta de guías de remisión remitente (tipo 09). "
+            "POST `/v1/despatch-advices` genera el UBL DespatchAdvice con datos "
+            "de traslado, transportista/conductor y vehículo."
         ),
     },
 ]
@@ -141,4 +151,10 @@ app.include_router(
     credit_notes_router.router,
     prefix="/v1/credit-notes",
     tags=["credit-notes"],
+)
+
+app.include_router(
+    despatch_advice_router.router,
+    prefix="/v1/despatch-advices",
+    tags=["despatch-advices"],
 )

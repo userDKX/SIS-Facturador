@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     CERT_PFX_BASE64: str
     CERT_PASSWORD: str
 
+    # Credenciales API GRE (Nueva Guia de Remision Electronica).
+    # Se obtienen en SUNAT SOL > Credenciales API SUNAT y son independientes
+    # del usuario SOL / certificado. Requeridas solo para emitir tipo 09.
+    GRE_CLIENT_ID: str = ""
+    GRE_CLIENT_SECRET: str = ""
+
     @property
     def sunat_wsdl(self) -> str:
         return SUNAT_WSDL_PROD if self.MODE == "prod" else SUNAT_WSDL_BETA

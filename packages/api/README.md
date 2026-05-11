@@ -13,9 +13,13 @@ correrlo es clonar el repo padre y seguir
   `GET /v1/invoices/{id}` (FastAPI).
 - Emisión de **nota de crédito** (`07`) referenciando una factura/boleta
   previa: `POST /v1/credit-notes`, `GET /v1/credit-notes/{id}`.
-- Orquesta el pipeline del SDK (build → sign → zip → sendBill → CDR).
-- Persiste comprobantes en Postgres (Supabase). Tablas `invoices` y
-  `credit_notes` con FK opcional entre ellas.
+- Emisión de **guía de remisión remitente** (`09`) por la Nueva GRE REST:
+  `POST /v1/despatch-advices`, `GET /v1/despatch-advices/{id}`. Requiere
+  `GRE_CLIENT_ID` / `GRE_CLIENT_SECRET` en `.env` (Credenciales API SUNAT,
+  distintas del usuario SOL).
+- Orquesta el pipeline del SDK (build → sign → zip → sendBill/sendGre → CDR).
+- Persiste comprobantes en Postgres (Supabase). Tablas `invoices`,
+  `credit_notes` y `despatch_advices`.
 - Sube XML firmado y CDR a Supabase Storage.
 - Healthchecks `/v1/health` y `/v1/health/cert`.
 
@@ -36,9 +40,9 @@ src/sis_facturador/
 ├── config.py          pydantic-settings (lee .env)
 ├── database.py        SQLAlchemy + psycopg v3
 ├── sunat_runtime.py   caches del SDK (cert, zeep client) leyendo settings
-├── models/            ORM SQLAlchemy (invoice, credit_note)
-├── schemas/           Pydantic v2 (invoice, credit_note)
+├── models/            ORM SQLAlchemy (invoice, credit_note, despatch_advice)
+├── schemas/           Pydantic v2 (invoice, credit_note, despatch_advice)
 ├── services/          orquestación que usa pe_invoicing
-├── routers/           endpoints REST (invoices, credit_notes)
+├── routers/           endpoints REST (invoices, credit_notes, despatch_advices)
 └── storage/           adaptadores local + Supabase Storage
 ```

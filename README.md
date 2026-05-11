@@ -7,9 +7,10 @@
 [![Last commit](https://img.shields.io/github/last-commit/userDKX/SIS-Facturador)](https://github.com/userDKX/SIS-Facturador/commits/main)
 
 API REST para facturar electrónicamente ante SUNAT (Perú), escrita en Python.
-Genera Factura (`01`), Boleta (`03`) y Nota de Crédito (`07`) en UBL 2.1, las
-firma con XMLDSig RSA-SHA256, las manda por SOAP al webservice del
-contribuyente (SEE-DSC) y guarda el CDR aceptado.
+Genera Factura (`01`), Boleta (`03`), Nota de Crédito (`07`) y Guía de Remisión
+remitente (`09`) en UBL 2.1, las firma con XMLDSig RSA-SHA256, las manda al
+webservice del contribuyente — SOAP `billService` para CPE, REST `Nueva GRE 2.0`
+para guías — y guarda el CDR aceptado.
 
 Está corriendo en producción real desde el 2026-05-08.
 
@@ -33,16 +34,22 @@ El 2026-05-08 se mandaron a `e-factura.sunat.gob.pe`:
 - Boleta `B001-1`: aceptada, code 0, ticket `202620668493873`
 - Factura `F001-1`: aceptada, code 0, ticket `202620668506859`
 
-Ambos figuran como **Procesado** en el portal SOL bajo
-*Empresas → Comprobantes de pago → SEE - Del Contribuyente y Envío de
-Documentos → Consultar Envíos de CPE*.
+El 2026-05-11 se emitió la primera guía de remisión por la Nueva GRE REST
+(`api-cpe.sunat.gob.pe`):
+
+- Guía de remisión `T001-1`: aceptada, code 0, CDR firmado por SUNAT.
+
+Todos figuran como **Procesado/Aceptado** en SOL bajo *Empresas →
+Comprobantes de pago → SEE - Del Contribuyente* (CPE) y *Guía de Remisión
+Electrónica → Consultas* (GR).
 
 ## Stack
 
 - FastAPI 0.115 + Pydantic v2 + Uvicorn
 - `lxml` + `Jinja2` para construir el UBL 2.1
 - `signxml` + `cryptography` para la firma XMLDSig (RSA-SHA256, Exclusive C14N)
-- `zeep` para el cliente SOAP (con WSDL bundleado local)
+- `zeep` para el cliente SOAP de CPE (con WSDL bundleado local)
+- `requests` para la Nueva GRE REST (OAuth2 password + polling de CDR)
 - SQLAlchemy 2.0 + `psycopg` v3 sobre Postgres (Supabase free tier funciona)
 - Vercel Hobby + Fluid Compute (300s) en el modo single-tenant
 
@@ -67,19 +74,20 @@ troubleshooting típico) en [`docs/INSTALL.md`](./docs/INSTALL.md).
 ## El flujo, en cinco cajas
 
 ```
-POST /v1/invoices
-      │
-      ▼
-schemas.InvoiceCreate          (validación Pydantic)
-      ▼
-ubl.builder.build_invoice_xml  (UBL 2.1 sin firmar)
-      ▼
-signer.xmldsig.sign_invoice_xml  (XMLDSig embebido en
-      │                           cac:UBLExtensions/.../ExtensionContent)
-      ▼
-sunat.packager.pack_invoice    (ZIP {ruc}-{tipo}-{serie}-{nro}.zip)
-      ▼
-sunat.client.send_bill         (SOAP a SUNAT, parsea CDR, devuelve resultado)
+POST /v1/invoices                                  POST /v1/despatch-advices
+      │                                                  │
+      ▼                                                  ▼
+schemas.InvoiceCreate           (Pydantic v2)     schemas.DespatchAdviceCreate
+      ▼                                                  ▼
+ubl.builder.build_invoice_xml   (UBL 2.1)         ubl.builder.build_despatchadvice_xml
+      ▼                                                  ▼
+signer.xmldsig.sign_invoice_xml   (XMLDSig RSA-SHA256, ds:Signature dentro de
+                                    cac:UBLExtensions/.../ExtensionContent)
+      ▼                                                  ▼
+sunat.packager.pack_invoice       (ZIP {ruc}-{tipo}-{serie}-{nro}.zip)
+      ▼                                                  ▼
+sunat.client.send_bill            sunat.gre_client.get_gre_token + send_gre
+(SOAP billService)                (OAuth2 password + REST + polling CDR)
 ```
 
 ## Modos de despliegue
@@ -143,6 +151,8 @@ Ya hecho:
 - Factura tipo `01` end-to-end (validada en prod)
 - Boleta tipo `03` end-to-end (validada en prod)
 - Nota de Crédito tipo `07` end-to-end
+- Guía de Remisión Remitente tipo `09` end-to-end por la Nueva GRE REST
+  (validada en prod 2026-05-11)
 
 Por hacer:
 
@@ -152,7 +162,6 @@ Por hacer:
 - PDF con QR (WeasyPrint)
 - Auth por API key (preparación multi-tenant)
 - Soporte OSE (operador de servicios electrónicos)
-- Guía de Remisión (otro WSDL)
 - Implementación del modo provider en K8s
 
 ## Estructura del repo

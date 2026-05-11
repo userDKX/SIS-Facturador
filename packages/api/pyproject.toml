@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sis-facturador"
-version = "0.1.0"
+version = "0.2.0"
 description = "Microservicio HTTP que envuelve pe-invoicing y agrega persistencia, storage y deploy en Vercel."
 readme = "README.md"
 requires-python = ">=3.11"
