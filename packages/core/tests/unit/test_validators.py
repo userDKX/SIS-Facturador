@@ -2,6 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 import pytest
+
 from sunat_py import (
     GRLine,
     InvoiceLine,
