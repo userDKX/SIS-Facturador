@@ -42,7 +42,7 @@ from sis_facturador.config import get_settings
 
 get_settings.cache_clear()
 
-from pe_invoicing import (
+from sunat_py import (
     InvoiceInput,
     InvoiceLine,
     Party,

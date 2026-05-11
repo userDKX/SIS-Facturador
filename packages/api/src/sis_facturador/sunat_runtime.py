@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pe_invoicing import (
+from sunat_py import (
     CertBundle,
     build_zeep_client,
     load_cert_from_base64,

@@ -1,7 +1,7 @@
 # Workspace root del repo. NO es un paquete instalable en si mismo.
 #
 # Los paquetes publicables viven en packages/:
-#   - packages/core/  -> pe-invoicing (SDK, publicable a PyPI)
+#   - packages/core/  -> sunat-py (SDK, publicable a PyPI)
 #   - packages/api/   -> sis-facturador (microservicio HTTP)
 #
 # Este pyproject solo contiene la config de tooling (ruff, mypy, pytest,
@@ -26,7 +26,7 @@ line-length = 100
 target-version = "py311"
 extend-exclude = [
     ".venv",
-    "packages/core/src/pe_invoicing/sunat/wsdl",
+    "packages/core/src/sunat_py/sunat/wsdl",
     "migrations",
     "build",
     "dist",
@@ -70,7 +70,7 @@ exclude = [
     "scripts/",
     "migrations/",
     ".venv/",
-    "packages/core/src/pe_invoicing/sunat/wsdl/",
+    "packages/core/src/sunat_py/sunat/wsdl/",
 ]
 
 [[tool.mypy.overrides]]
@@ -96,7 +96,7 @@ addopts = [
 # ---------------------------------------------------------------------------
 [tool.coverage.run]
 source = [
-    "packages/core/src/pe_invoicing",
+    "packages/core/src/sunat_py",
     "packages/api/src/sis_facturador",
 ]
 branch = true

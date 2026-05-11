@@ -4,13 +4,23 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from lxml import etree
 
-from pe_invoicing.ubl.models import (
+from sunat_py.errors import ValidationError
+from sunat_py.ubl.models import (
     CreditNoteInput,
+    DebitNoteInput,
     DespatchAdviceInput,
     GRLine,
     InvoiceInput,
     InvoiceLine,
     InvoiceTotals,
+    SummaryDocumentsInput,
+    VoidedDocumentsInput,
+)
+from sunat_py.validators import (
+    validate_emisor,
+    validate_emission_date,
+    validate_identity_doc,
+    validate_lines,
 )
 
 IGV_RATE = Decimal("0.18")
@@ -212,6 +222,11 @@ def build_invoice_xml(inv: InvoiceInput) -> str:
     El elemento <ext:ExtensionContent/> queda vacio para que el signer
     inserte ahi la firma XMLDSig.
     """
+    validate_emisor(inv.emisor)
+    validate_identity_doc(inv.receptor.tipo_doc, inv.receptor.numero_doc)
+    validate_emission_date(inv.fecha_emision)
+    validate_lines(inv.lines)
+
     template = _env.get_template("invoice_01.xml.j2")
     totals = compute_totals(inv.lines)
     enriched_lines = [_enrich_line(line, inv.moneda) for line in inv.lines]
@@ -244,6 +259,11 @@ def build_creditnote_xml(inv: CreditNoteInput) -> str:
     El elemento <ext:ExtensionContent/> queda vacio para que el signer
     inserte ahi la firma XMLDSig.
     """
+    validate_emisor(inv.emisor)
+    validate_identity_doc(inv.receptor.tipo_doc, inv.receptor.numero_doc)
+    validate_emission_date(inv.fecha_emision)
+    validate_lines(inv.lines)
+
     template = _env.get_template("creditnote_07.xml.j2")
     totals = compute_totals(inv.lines)
     enriched_lines = [_enrich_line(line, inv.moneda) for line in inv.lines]
@@ -259,6 +279,125 @@ def build_creditnote_xml(inv: CreditNoteInput) -> str:
         },
     )
 
+    etree.fromstring(rendered.encode("utf-8"))
+    return rendered
+
+
+def build_debitnote_xml(inv: DebitNoteInput) -> str:
+    """Renderiza una DebitNote UBL 2.1 (tipo 08) sin firmar.
+
+    Diferencias UBL respecto a CreditNote:
+      * Root <DebitNote> con namespace DebitNote-2.
+      * <cac:DiscrepancyResponse> con motivo del catalogo 10 (no 09).
+      * <cac:RequestedMonetaryTotal> en lugar de <cac:LegalMonetaryTotal>.
+      * Lineas en <cac:DebitNoteLine> con <cbc:DebitedQuantity>.
+
+    El elemento <ext:ExtensionContent/> queda vacio para que el signer
+    inserte ahi la firma XMLDSig.
+    """
+    validate_emisor(inv.emisor)
+    validate_identity_doc(inv.receptor.tipo_doc, inv.receptor.numero_doc)
+    validate_emission_date(inv.fecha_emision)
+    validate_lines(inv.lines)
+
+    template = _env.get_template("debitnote_08.xml.j2")
+    totals = compute_totals(inv.lines)
+    enriched_lines = [_enrich_line(line, inv.moneda) for line in inv.lines]
+
+    rendered = template.render(
+        inv=inv,
+        lines=enriched_lines,
+        totals={
+            "subtotal": _q(totals.subtotal),
+            "igv": _q(totals.igv),
+            "total": _q(totals.total),
+            "monto_letras": monto_en_letras(totals.total, inv.moneda),
+        },
+    )
+
+    etree.fromstring(rendered.encode("utf-8"))
+    return rendered
+
+
+def build_voided_xml(inv: VoidedDocumentsInput) -> str:
+    """Renderiza una comunicacion de baja (RA) UBL sin firmar.
+
+    Estructura UBL especifica de SUNAT (namespace sunat: VoidedDocuments-1):
+      * Sin TaxTotal ni MonetaryTotal (no maneja dinero).
+      * <cbc:ReferenceDate> = fecha del CPE a anular.
+      * <cbc:IssueDate> = fecha de envio del RA.
+      * <sac:VoidedDocumentsLine> por cada CPE a anular.
+
+    El elemento <ext:ExtensionContent/> queda vacio para que el signer
+    inserte ahi la firma XMLDSig.
+    """
+    validate_emisor(inv.emisor)
+    if not inv.items:
+        raise ValidationError("RA: items no puede estar vacio")
+    for idx, item in enumerate(inv.items, start=1):
+        if not item.motivo:
+            raise ValidationError(f"RA item {idx}: motivo es obligatorio")
+        if item.tipo_doc not in {"01", "03", "07", "08"}:
+            raise ValidationError(
+                f"RA item {idx}: tipo_doc {item.tipo_doc!r} invalido "
+                f"(validos: 01 factura, 03 boleta, 07 NC, 08 ND)"
+            )
+
+    template = _env.get_template("voided_RA.xml.j2")
+    rendered = template.render(inv=inv)
+    etree.fromstring(rendered.encode("utf-8"))
+    return rendered
+
+
+def _enrich_summary_item(item) -> dict:
+    return {
+        "tipo_doc": item.tipo_doc,
+        "serie": item.serie,
+        "numero": item.numero,
+        "cliente_tipo_doc": item.cliente_tipo_doc,
+        "cliente_numero_doc": item.cliente_numero_doc,
+        "moneda": item.moneda,
+        "total": _q(item.total),
+        "base_gravada": _q(item.base_gravada),
+        "igv": _q(item.igv),
+        "estado": item.estado,
+        "base_exonerada": _q(item.base_exonerada) if item.base_exonerada else None,
+        "base_inafecta": _q(item.base_inafecta) if item.base_inafecta else None,
+    }
+
+
+def build_summary_xml(inv: SummaryDocumentsInput) -> str:
+    """Renderiza un resumen diario de boletas (RC) UBL sin firmar.
+
+    Estructura UBL especifica de SUNAT (namespace sunat: SummaryDocuments-1):
+      * <cbc:ReferenceDate> = fecha de las boletas resumidas.
+      * <cbc:IssueDate> = fecha de envio del RC.
+      * <sac:SummaryDocumentsLine> por cada boleta/NC/ND incluida.
+      * Cada linea lleva cliente (tipo_doc + numero), total, base
+        gravada/exonerada/inafecta, IGV, y estado (1 adicionar,
+        2 modificar, 3 anular).
+
+    El elemento <ext:ExtensionContent/> queda vacio para que el signer
+    inserte ahi la firma XMLDSig.
+    """
+    validate_emisor(inv.emisor)
+    if not inv.items:
+        raise ValidationError("RC: items no puede estar vacio")
+    for idx, item in enumerate(inv.items, start=1):
+        if item.tipo_doc not in {"03", "07", "08"}:
+            raise ValidationError(
+                f"RC item {idx}: tipo_doc {item.tipo_doc!r} invalido "
+                f"(validos: 03 boleta, 07 NC sobre boleta, 08 ND sobre boleta)"
+            )
+        if item.estado not in {"1", "2", "3"}:
+            raise ValidationError(
+                f"RC item {idx}: estado {item.estado!r} invalido "
+                f"(validos: 1 adicionar, 2 modificar, 3 anular)"
+            )
+
+    template = _env.get_template("summary_RC.xml.j2")
+    items = [_enrich_summary_item(it) for it in inv.items]
+    rendered = template.render(inv=inv, items=items)
     etree.fromstring(rendered.encode("utf-8"))
     return rendered
 
@@ -286,6 +425,11 @@ def build_despatchadvice_xml(inv: DespatchAdviceInput) -> str:
     El elemento <ext:ExtensionContent/> queda vacio para que el signer
     inserte ahi la firma XMLDSig.
     """
+    validate_emisor(inv.emisor)
+    validate_identity_doc(inv.destinatario.tipo_doc, inv.destinatario.numero_doc)
+    validate_emission_date(inv.fecha_emision)
+    validate_lines(inv.lines)
+
     template = _env.get_template("despatchadvice_09.xml.j2")
     enriched_lines = [_enrich_grline(line) for line in inv.lines]
 

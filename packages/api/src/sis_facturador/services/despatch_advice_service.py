@@ -1,7 +1,7 @@
 import hashlib
 import logging
 
-from pe_invoicing import (
+from sunat_py import (
     Conductor,
     DespatchAdviceInput,
     DireccionTraslado,

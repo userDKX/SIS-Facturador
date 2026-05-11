@@ -15,7 +15,7 @@ Marker `beta` -> corre con `pytest -m beta`. CI lo skipea con
 import os
 
 import pytest
-from pe_invoicing import (
+from sunat_py import (
     build_invoice_xml,
     build_zeep_client,
     load_cert_from_base64,

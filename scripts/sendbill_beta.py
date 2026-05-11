@@ -24,7 +24,7 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from pe_invoicing import (
+from sunat_py import (
     InvoiceInput,
     InvoiceLine,
     Party,

@@ -3,14 +3,14 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pe-invoicing"
+name = "sunat-py"
 version = "0.3.0"
-description = "SDK Python para emitir comprobantes electrónicos a SUNAT (Perú): factura, boleta, nota de crédito y guía de remisión remitente. UBL 2.1, XMLDSig RSA-SHA256, SOAP sendBill y Nueva GRE REST. Sin opinión sobre HTTP ni persistencia."
+description = "Comprobantes electrónicos SUNAT (Perú) desde Python: factura, boleta, NC, ND, GRE remitente, comunicación de baja y resumen diario. UBL 2.1, XMLDSig, SOAP y REST. En desarrollo activo."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Luis Luza M.", email = "noreply@userdkx.dev" },
+    { name = "Luis Luza M.", email = "userDKX@users.noreply.github.com" },
 ]
 keywords = [
     "sunat",
@@ -22,8 +22,12 @@ keywords = [
     "factura-electronica",
     "boleta-electronica",
     "nota-credito",
+    "nota-debito",
+    "comunicacion-baja",
+    "resumen-diario",
     "guia-remision",
     "gre",
+    "validator",
     "sdk",
 ]
 classifiers = [
@@ -52,11 +56,12 @@ dependencies = [
 Homepage = "https://github.com/userDKX/SIS-Facturador"
 Repository = "https://github.com/userDKX/SIS-Facturador"
 Issues = "https://github.com/userDKX/SIS-Facturador/issues"
-Changelog = "https://github.com/userDKX/SIS-Facturador/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/userDKX/SIS-Facturador/blob/main/packages/core/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"pe_invoicing.ubl" = ["templates/*.j2"]
-"pe_invoicing.sunat" = ["wsdl/**/*.wsdl", "wsdl/**/*.xsd"]
+"sunat_py" = ["py.typed"]
+"sunat_py.ubl" = ["templates/*.j2"]
+"sunat_py.sunat" = ["wsdl/**/*.wsdl", "wsdl/**/*.xsd"]

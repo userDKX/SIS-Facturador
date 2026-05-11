@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from lxml import etree
-from pe_invoicing import InvoiceLine, build_invoice_xml, compute_totals
+from sunat_py import InvoiceLine, build_invoice_xml, compute_totals
 
 NS_CBC = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
 NS_CAC = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"

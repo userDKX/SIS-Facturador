@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sis-facturador"
 version = "0.2.0"
-description = "Microservicio HTTP que envuelve pe-invoicing y agrega persistencia, storage y deploy en Vercel."
+description = "Microservicio HTTP que envuelve sunat-py y agrega persistencia, storage y deploy en Vercel."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -27,7 +27,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "pe-invoicing",
+    "sunat-py",
     "fastapi>=0.115,<1",
     "pydantic>=2.10,<3",
     "pydantic-settings>=2.7,<3",

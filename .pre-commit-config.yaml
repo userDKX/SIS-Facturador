@@ -8,9 +8,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: ^packages/core/src/pe_invoicing/sunat/wsdl/
+        exclude: ^packages/core/src/sunat_py/sunat/wsdl/
       - id: end-of-file-fixer
-        exclude: ^packages/core/src/pe_invoicing/sunat/wsdl/
+        exclude: ^packages/core/src/sunat_py/sunat/wsdl/
       - id: check-yaml
       - id: check-toml
       - id: check-json
@@ -20,7 +20,7 @@ repos:
       - id: detect-private-key
       - id: mixed-line-ending
         args: ["--fix=lf"]
-        exclude: ^packages/core/src/pe_invoicing/sunat/wsdl/
+        exclude: ^packages/core/src/sunat_py/sunat/wsdl/
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.4

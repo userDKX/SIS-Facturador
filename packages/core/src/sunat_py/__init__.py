@@ -1,35 +1,43 @@
-"""pe-invoicing — SDK Python para SUNAT Peru.
+"""sunat-py — SDK Python para SUNAT Peru.
 
 Atajos para los simbolos mas usados. Si necesitas mas, los modulos
-internos viven en `pe_invoicing.{ubl,signer,sunat,security}`.
+internos viven en `sunat_py.{ubl,signer,sunat,security}`.
 """
 
-from pe_invoicing.security.cert_loader import (
+from sunat_py.errors import ValidationError
+from sunat_py.security.cert_loader import (
     CertBundle,
     load_cert_from_base64,
     load_cert_from_pfx,
 )
-from pe_invoicing.signer.xmldsig import sign_invoice_xml
-from pe_invoicing.sunat.client import (
+from sunat_py.signer.xmldsig import sign_invoice_xml
+from sunat_py.sunat.client import (
     SunatError,
     SunatMode,
     SunatResult,
     SunatStatus,
+    aget_status,
     build_zeep_client,
+    get_status,
     send_bill,
+    send_summary,
 )
-from pe_invoicing.sunat.gre_client import GreResult, get_gre_token, send_gre
-from pe_invoicing.sunat.packager import pack_invoice, unpack_cdr
-from pe_invoicing.ubl.builder import (
+from sunat_py.sunat.gre_client import GreResult, get_gre_token, send_gre
+from sunat_py.sunat.packager import pack_invoice, unpack_cdr
+from sunat_py.ubl.builder import (
     build_creditnote_xml,
+    build_debitnote_xml,
     build_despatchadvice_xml,
     build_invoice_xml,
+    build_summary_xml,
+    build_voided_xml,
     compute_totals,
     monto_en_letras,
 )
-from pe_invoicing.ubl.models import (
+from sunat_py.ubl.models import (
     Conductor,
     CreditNoteInput,
+    DebitNoteInput,
     DespatchAdviceInput,
     DireccionTraslado,
     GRLine,
@@ -38,8 +46,20 @@ from pe_invoicing.ubl.models import (
     InvoiceTotals,
     Party,
     ReferenciaDoc,
+    SummaryDocumentsInput,
+    SummaryItem,
     Transportista,
     Vehiculo,
+    VoidedDocumentsInput,
+    VoidedItem,
+)
+from sunat_py.validators import (
+    today_lima,
+    validate_emisor,
+    validate_emission_date,
+    validate_identity_doc,
+    validate_lines,
+    validate_ruc,
 )
 
 __version__ = "0.3.0"
@@ -48,6 +68,7 @@ __all__ = [
     "CertBundle",
     "Conductor",
     "CreditNoteInput",
+    "DebitNoteInput",
     "DespatchAdviceInput",
     "DireccionTraslado",
     "GRLine",
@@ -57,25 +78,42 @@ __all__ = [
     "InvoiceTotals",
     "Party",
     "ReferenciaDoc",
+    "SummaryDocumentsInput",
+    "SummaryItem",
     "SunatError",
     "SunatMode",
     "SunatResult",
     "SunatStatus",
     "Transportista",
+    "ValidationError",
     "Vehiculo",
+    "VoidedDocumentsInput",
+    "VoidedItem",
     "__version__",
+    "aget_status",
     "build_creditnote_xml",
+    "build_debitnote_xml",
     "build_despatchadvice_xml",
     "build_invoice_xml",
+    "build_summary_xml",
+    "build_voided_xml",
     "build_zeep_client",
     "compute_totals",
     "get_gre_token",
+    "get_status",
     "load_cert_from_base64",
     "load_cert_from_pfx",
     "monto_en_letras",
     "pack_invoice",
     "send_bill",
     "send_gre",
+    "send_summary",
     "sign_invoice_xml",
+    "today_lima",
     "unpack_cdr",
+    "validate_emisor",
+    "validate_emission_date",
+    "validate_identity_doc",
+    "validate_lines",
+    "validate_ruc",
 ]

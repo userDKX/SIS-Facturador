@@ -14,7 +14,7 @@ Marker `beta` -> corre con `pytest -m beta`.
 import os
 
 import pytest
-from pe_invoicing import (
+from sunat_py import (
     build_creditnote_xml,
     build_zeep_client,
     load_cert_from_base64,

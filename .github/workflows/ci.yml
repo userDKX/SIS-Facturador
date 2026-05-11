@@ -53,7 +53,7 @@ jobs:
       - name: Install dev deps
         run: pip install -r requirements-dev.txt
       - name: Mypy core
-        run: mypy packages/core/src/pe_invoicing || true
+        run: mypy packages/core/src/sunat_py || true
       - name: Mypy api
         run: mypy packages/api/src/sis_facturador || true
         # `|| true` mientras estabilizamos los tipos (signxml/zeep no tienen
@@ -65,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.11", "3.12"]
+        python: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

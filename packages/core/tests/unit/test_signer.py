@@ -2,8 +2,8 @@ import os
 
 import pytest
 from lxml import etree
-from pe_invoicing import build_invoice_xml, load_cert_from_base64, sign_invoice_xml
-from pe_invoicing.signer.xmldsig import NS_DS, NS_EXT
+from sunat_py import build_invoice_xml, load_cert_from_base64, sign_invoice_xml
+from sunat_py.signer.xmldsig import NS_DS, NS_EXT
 from signxml import XMLVerifier
 
 

@@ -20,7 +20,7 @@ from pathlib import Path
 
 from cryptography.x509.oid import NameOID
 from lxml import etree
-from pe_invoicing import (
+from sunat_py import (
     InvoiceInput,
     InvoiceLine,
     Party,

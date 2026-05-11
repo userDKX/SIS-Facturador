@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from lxml import etree
-from pe_invoicing import build_despatchadvice_xml
+from sunat_py import build_despatchadvice_xml
 
 NS_DA = "urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2"
 NS_CBC = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
@@ -134,7 +134,7 @@ def test_build_despatchadvice_xml_leaves_extension_content_empty(sample_despatch
 
 def test_build_despatchadvice_xml_public_transport_has_carrier(sample_despatchadvice_input):
     """Reemplaza conductor/vehiculo por transportista para modalidad 01."""
-    from pe_invoicing import DespatchAdviceInput, Transportista
+    from sunat_py import DespatchAdviceInput, Transportista
 
     inv = DespatchAdviceInput(
         serie=sample_despatchadvice_input.serie,

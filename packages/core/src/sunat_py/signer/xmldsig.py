@@ -1,7 +1,7 @@
 from lxml import etree
 from signxml import XMLSigner, methods
 
-from pe_invoicing.security.cert_loader import CertBundle
+from sunat_py.security.cert_loader import CertBundle
 
 NS_DS = "http://www.w3.org/2000/09/xmldsig#"
 NS_EXT = "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"

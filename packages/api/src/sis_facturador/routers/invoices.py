@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pe_invoicing import SunatError
+from sunat_py import SunatError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 

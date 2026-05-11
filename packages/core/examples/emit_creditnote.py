@@ -16,10 +16,9 @@ from __future__ import annotations
 
 import os
 import sys
-from datetime import date
 from decimal import Decimal
 
-from pe_invoicing import (
+from sunat_py import (
     CreditNoteInput,
     InvoiceLine,
     Party,
@@ -31,6 +30,7 @@ from pe_invoicing import (
     pack_invoice,
     send_bill,
     sign_invoice_xml,
+    today_lima,
 )
 
 
@@ -48,23 +48,29 @@ def main() -> int:
     cert = load_cert_from_base64(pfx_b64, pfx_password)
     print(f"Cert cargado: CN={cert.common_name}, serial={cert.serial_hex}")
 
+    mode = os.environ.get("SUNAT_MODE", "prod")
+    if mode not in ("beta", "prod"):
+        print(f"SUNAT_MODE debe ser 'beta' o 'prod', recibido: {mode!r}")
+        return 1
+
     emisor = Party(
         tipo_doc="6",
         numero_doc=ruc,
-        razon_social="MI EMPRESA",
-        direccion="AV. EJEMPLO 123, LIMA",
+        razon_social="TRANSP M & L EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA",
+        direccion="CAL.ICA MZA. A LOTE. 8 ICA - NASCA - VISTA ALEGRE",
+        ubigeo="150101",
     )
     receptor = Party(
         tipo_doc="6",
-        numero_doc="20512345678",
-        razon_social="CLIENTE EJEMPLO S.A.C.",
-        direccion="AV. CLIENTE 456, LIMA",
+        numero_doc=ruc,
+        razon_social="TRANSP M & L EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA",
+        direccion="",
     )
 
     nc = CreditNoteInput(
         serie="FC01",
-        numero=1,
-        fecha_emision=date.today(),
+        numero=2,
+        fecha_emision=today_lima(),
         moneda="PEN",
         motivo_codigo="01",
         motivo_descripcion="ANULACION DE LA OPERACION",
@@ -74,10 +80,10 @@ def main() -> int:
         lines=[
             InvoiceLine(
                 codigo="SERV01",
-                descripcion="Servicio de consultoria",
+                descripcion="SERVICIO BASICO",
                 unidad="ZZ",
                 cantidad=Decimal("1"),
-                precio_unitario=Decimal("100"),
+                precio_unitario=Decimal("1.00"),
                 igv_afectacion="10",
             ),
         ],
@@ -89,7 +95,7 @@ def main() -> int:
     filename_base = f"{ruc}-07-{nc.serie}-{nc.numero}"
     zip_bytes = pack_invoice(signed, filename_base)
 
-    client = build_zeep_client(mode="beta", ruc=ruc, username=sunat_user, password=sunat_password)
+    client = build_zeep_client(mode=mode, ruc=ruc, username=sunat_user, password=sunat_password)  # type: ignore[arg-type]
     try:
         result = send_bill(client, zip_bytes, f"{filename_base}.zip")
     except SunatError as exc:

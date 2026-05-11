@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from lxml import etree
-from pe_invoicing import build_creditnote_xml
+from sunat_py import build_creditnote_xml
 
 NS_CN = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
 NS_CBC = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
