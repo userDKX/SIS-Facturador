@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 from lxml import etree
 
