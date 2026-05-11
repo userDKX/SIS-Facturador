@@ -1,6 +1,7 @@
 import hashlib
 import logging
 
+from sqlalchemy.orm import Session
 from sunat_py import (
     Conductor,
     DespatchAdviceInput,
@@ -16,7 +17,6 @@ from sunat_py import (
     send_gre,
     sign_invoice_xml,
 )
-from sqlalchemy.orm import Session
 
 from sis_facturador.config import settings
 from sis_facturador.models.despatch_advice import DespatchAdvice

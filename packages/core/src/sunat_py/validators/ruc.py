@@ -29,7 +29,7 @@ def validate_ruc(ruc: str) -> None:
             f"prefijo de RUC invalido: {prefijo!r}. SUNAT acepta 10, 15, 16, 17, 20"
         )
 
-    suma = sum(int(d) * w for d, w in zip(ruc[:10], _WEIGHTS))
+    suma = sum(int(d) * w for d, w in zip(ruc[:10], _WEIGHTS, strict=True))
     resto = suma % 11
     dv_calculado = (11 - resto) % 11
     if dv_calculado == 10:

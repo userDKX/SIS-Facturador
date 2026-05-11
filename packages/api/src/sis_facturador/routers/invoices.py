@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sunat_py import SunatError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sunat_py import SunatError
 
 from sis_facturador.database import get_db
 from sis_facturador.models.invoice import Invoice

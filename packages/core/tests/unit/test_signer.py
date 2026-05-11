@@ -2,9 +2,9 @@ import os
 
 import pytest
 from lxml import etree
+from signxml import XMLVerifier
 from sunat_py import build_invoice_xml, load_cert_from_base64, sign_invoice_xml
 from sunat_py.signer.xmldsig import NS_DS, NS_EXT
-from signxml import XMLVerifier
 
 
 def _has_cert() -> bool:

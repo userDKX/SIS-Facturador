@@ -2,7 +2,6 @@ from datetime import date
 
 import pytest
 from lxml import etree
-
 from sunat_py import (
     Party,
     ValidationError,

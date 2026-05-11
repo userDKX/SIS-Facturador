@@ -56,6 +56,7 @@ from sis_facturador.config import get_settings
 
 get_settings.cache_clear()
 
+from sis_facturador.config import settings
 from sunat_py import (
     Conductor,
     DespatchAdviceInput,
@@ -71,7 +72,6 @@ from sunat_py import (
     send_gre,
     sign_invoice_xml,
 )
-from sis_facturador.config import settings
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -144,7 +144,7 @@ def main() -> int:
         print("(son distintas del usuario SOL y del certificado).")
         return 2
 
-    print(f"\nAPI GRE     : api-cpe.sunat.gob.pe")
+    print("\nAPI GRE     : api-cpe.sunat.gob.pe")
     print(f"RUC emisor  : {settings.SUNAT_RUC}")
     print(f"Usuario SOL : {settings.sunat_username}")
     print("\n--- Guia de Remision a emitir ---")

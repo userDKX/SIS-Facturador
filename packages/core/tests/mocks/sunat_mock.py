@@ -102,5 +102,4 @@ def mock_get_status_in_progress_then_accepted():
             cdr_xml=SAMPLE_CDR_ACCEPTED_XML,
         ),
     ]
-    for attempt in attempts:
-        yield attempt
+    yield from attempts

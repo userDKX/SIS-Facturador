@@ -33,6 +33,7 @@ from sis_facturador.config import get_settings
 
 get_settings.cache_clear()
 
+from sis_facturador.config import settings
 from sunat_py import (
     InvoiceInput,
     InvoiceLine,
@@ -45,7 +46,6 @@ from sunat_py import (
     send_bill,
     sign_invoice_xml,
 )
-from sis_facturador.config import settings
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 

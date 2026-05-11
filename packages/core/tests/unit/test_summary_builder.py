@@ -3,7 +3,6 @@ from decimal import Decimal
 
 import pytest
 from lxml import etree
-
 from sunat_py import (
     Party,
     SummaryDocumentsInput,

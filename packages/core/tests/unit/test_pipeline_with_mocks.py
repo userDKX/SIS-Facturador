@@ -4,7 +4,6 @@ Verifica que la cadena builder -> packager -> mock SUNAT funcione sin
 credenciales reales. No corre la firma porque eso requiere cert.
 """
 
-from sunat_py import build_invoice_xml, pack_invoice
 from sunat_mock import (
     SAMPLE_CDR_ACCEPTED_XML,
     mock_get_status_accepted,
@@ -12,6 +11,7 @@ from sunat_mock import (
     mock_send_bill_rejected,
     mock_send_summary,
 )
+from sunat_py import build_invoice_xml, pack_invoice
 
 
 def test_pipeline_build_pack_send_accepted(sample_invoice_input):

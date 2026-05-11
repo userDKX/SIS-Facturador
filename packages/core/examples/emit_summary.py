@@ -28,9 +28,9 @@ from decimal import Decimal
 
 from sunat_py import (
     Party,
-    SunatError,
     SummaryDocumentsInput,
     SummaryItem,
+    SunatError,
     build_summary_xml,
     build_zeep_client,
     get_status,

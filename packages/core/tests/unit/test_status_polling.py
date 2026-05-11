@@ -16,9 +16,8 @@ import io
 import zipfile
 
 import pytest
-from sunat_py import SunatError, aget_status, get_status
-
 from sunat_mock import SAMPLE_CDR_ACCEPTED_XML
+from sunat_py import SunatError, aget_status, get_status
 
 
 def _zip_cdr(xml: bytes, name: str = "R-cdr.xml") -> bytes:
@@ -39,7 +38,7 @@ class _FakeService:
         self._responses = list(responses)
         self.calls = 0
 
-    def getStatus(self, ticket: str) -> _FakeResponse:  # noqa: N802 — SOAP op
+    def getStatus(self, ticket: str) -> _FakeResponse:
         self.calls += 1
         if not self._responses:
             raise AssertionError("getStatus llamado mas veces que respuestas mockeadas")

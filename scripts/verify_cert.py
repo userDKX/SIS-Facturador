@@ -20,6 +20,8 @@ from pathlib import Path
 
 from cryptography.x509.oid import NameOID
 from lxml import etree
+from signxml import XMLVerifier
+from sis_facturador.config import settings
 from sunat_py import (
     InvoiceInput,
     InvoiceLine,
@@ -28,8 +30,6 @@ from sunat_py import (
     load_cert_from_base64,
     sign_invoice_xml,
 )
-from signxml import XMLVerifier
-from sis_facturador.config import settings
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
