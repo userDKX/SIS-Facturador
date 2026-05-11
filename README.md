@@ -7,10 +7,12 @@
 [![Last commit](https://img.shields.io/github/last-commit/userDKX/SIS-Facturador)](https://github.com/userDKX/SIS-Facturador/commits/main)
 
 API REST para facturar electrónicamente ante SUNAT (Perú), escrita en Python.
-Genera Factura (`01`), Boleta (`03`), Nota de Crédito (`07`) y Guía de Remisión
-remitente (`09`) en UBL 2.1, las firma con XMLDSig RSA-SHA256, las manda al
-webservice del contribuyente — SOAP `billService` para CPE, REST `Nueva GRE 2.0`
-para guías — y guarda el CDR aceptado.
+Genera Factura (`01`), Boleta (`03`), Nota de Crédito (`07`), Nota de Débito
+(`08`), Guía de Remisión Remitente (`09`), Comunicación de Baja (`RA`) y
+Resumen Diario de Boletas (`RC`) en UBL 2.1, las firma con XMLDSig RSA-SHA256,
+valida RUC + dígito verificador y fechas antes de enviar, y manda al
+webservice del contribuyente — SOAP `billService` / `sendSummary` para CPE,
+REST `Nueva GRE 2.0` para guías — guardando el CDR aceptado.
 
 Está corriendo en producción real desde el 2026-05-08.
 
@@ -38,6 +40,13 @@ El 2026-05-11 se emitió la primera guía de remisión por la Nueva GRE REST
 (`api-cpe.sunat.gob.pe`):
 
 - Guía de remisión `T001-1`: aceptada, code 0, CDR firmado por SUNAT.
+
+El 2026-05-11 se validaron el resto de los tipos de comprobante:
+
+- Nota de Crédito `FC01-2`: aceptada, code 0 (anula F001-1)
+- Nota de Débito `FD01-1`: aceptada, code 0 (interés por mora sobre F001-1)
+- Resumen Diario `RC-20260511-1`: aceptado, code 0, ticket `202620699620214`
+- Comunicación de Baja `RA-20260511-1`: aceptada, code 0, ticket `202620699633180` (anula F001-2)
 
 Todos figuran como **Procesado/Aceptado** en SOL bajo *Empresas →
 Comprobantes de pago → SEE - Del Contribuyente* (CPE) y *Guía de Remisión
@@ -148,17 +157,17 @@ Detalle de cada uno en [`docs/SUNAT.md`](./docs/SUNAT.md) y
 
 Ya hecho:
 
-- Factura tipo `01` end-to-end (validada en prod)
-- Boleta tipo `03` end-to-end (validada en prod)
-- Nota de Crédito tipo `07` end-to-end
+- Factura tipo `01` end-to-end (validada en prod 2026-05-08)
+- Boleta tipo `03` end-to-end (validada en prod 2026-05-08)
+- Nota de Crédito tipo `07` end-to-end (validada en prod 2026-05-11)
+- Nota de Débito tipo `08` end-to-end (validada en prod 2026-05-11)
 - Guía de Remisión Remitente tipo `09` end-to-end por la Nueva GRE REST
   (validada en prod 2026-05-11)
+- Comunicación de Baja (`RA`) end-to-end (validada en prod 2026-05-11)
+- Resumen Diario de Boletas (`RC`) end-to-end (validado en prod 2026-05-11)
 
 Por hacer:
 
-- Nota de Débito (`08`)
-- Comunicación de baja (sendSummary async + Vercel Cron)
-- Resumen diario de boletas
 - PDF con QR (WeasyPrint)
 - Auth por API key (preparación multi-tenant)
 - Soporte OSE (operador de servicios electrónicos)
@@ -170,15 +179,15 @@ El repo es un workspace con dos paquetes:
 
 ```
 packages/
-├── core/                       pe-invoicing (SDK, publicable a PyPI)
+├── core/                       sunat-py (SDK, publicable a PyPI)
 │   ├── pyproject.toml
-│   └── src/pe_invoicing/
+│   └── src/sunat_py/
 │       ├── ubl/                generación UBL 2.1 (Jinja2 + lxml)
 │       ├── signer/             firma XMLDSig RSA-SHA256
 │       ├── sunat/              cliente zeep + WSDLs bundleados
 │       └── security/           carga del cert .pfx desde base64
 └── api/                        sis-facturador (microservicio HTTP)
-    ├── pyproject.toml          depende de pe-invoicing
+    ├── pyproject.toml          depende de sunat-py
     └── src/sis_facturador/
         ├── main.py             FastAPI + middleware + healthcheck
         ├── config.py           pydantic-settings (lee .env)
@@ -198,7 +207,7 @@ examples/                       payloads y curl listos para usar
 ```
 
 **El SDK** (`packages/core`) no toca FastAPI ni la BD — es una librería pura
-que cualquier dev Python puede `pip install pe-invoicing` y usar desde su
+que cualquier dev Python puede `pip install sunat-py` y usar desde su
 propia app. **El microservicio** (`packages/api`) es un wrapper delgado
 encima del SDK: agrega HTTP, persistencia, storage y deploy.
 

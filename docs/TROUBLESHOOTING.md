@@ -55,15 +55,15 @@ Fix:
 - A veces el `.pfx` no tiene password — prueba dejando `CERT_PASSWORD=`
   vacío.
 
-### `WSDL local no encontrado: packages/core/src/pe_invoicing/sunat/wsdl/{mode}/billService.wsdl`
+### `WSDL local no encontrado: packages/core/src/sunat_py/sunat/wsdl/{mode}/billService.wsdl`
 
 Causa: el `MODE` está mal o no clonaste el repo completo (los WSDL están
-bundleados en `packages/core/src/pe_invoicing/sunat/wsdl/{beta,prod}/`).
+bundleados en `packages/core/src/sunat_py/sunat/wsdl/{beta,prod}/`).
 
 Fix:
 
 - Verifica `MODE=beta` o `MODE=prod` en `.env`.
-- Verifica que `ls packages/core/src/pe_invoicing/sunat/wsdl/beta/` muestra
+- Verifica que `ls packages/core/src/sunat_py/sunat/wsdl/beta/` muestra
   `billService.wsdl billService_ns1.wsdl billService_xsd2.xsd`.
 - Si los WSDL no están, vuelve a clonar el repo (no son submódulos, deben
   venir en el clone normal).
@@ -167,7 +167,7 @@ en el UBL. El mensaje del error suena a problema con el `InvoiceTypeCode`
 pero no es eso.
 
 Fix: el bug ya está cubierto por la plantilla actual. Si lo ves, es porque
-modificaste `pe_invoicing/ubl/templates/invoice_01.xml.j2` y removiste el bloque:
+modificaste `sunat_py/ubl/templates/invoice_01.xml.j2` y removiste el bloque:
 
 ```xml
 <cac:PaymentTerms>
@@ -249,7 +249,7 @@ configurado con `timeout=120` en `Transport(timeout=120, operation_timeout=120)`
 Fix:
 
 - Reintenta en unos minutos.
-- Si quieres más margen, sube los timeouts en `pe_invoicing/sunat/client.py`. En
+- Si quieres más margen, sube los timeouts en `sunat_py/sunat/client.py`. En
   Vercel Hobby el límite duro de la función es 300s, así que máximo
   `timeout=270` para dejar margen al wrap up.
 - Si el timeout es persistente, prueba el endpoint failover (cambiar

@@ -11,13 +11,13 @@ Cambios relevantes del **SIS Facturador**. Sigue el formato de
 - **Guía de Remisión Remitente (tipo 09)** end-to-end por la **Nueva GRE REST**
   (`api-cpe.sunat.gob.pe`). Verificada en producción 2026-05-11 con
   `accepted` / code 0.
-  - SDK `pe-invoicing` 0.3.0: `DespatchAdviceInput`, `DireccionTraslado`,
+  - SDK `sunat-py` 0.3.0: `DespatchAdviceInput`, `DireccionTraslado`,
     `GRLine`, `Transportista`, `Conductor`, `Vehiculo`,
     `build_despatchadvice_xml`, plantilla UBL `despatchadvice_09.xml.j2`
     siguiendo la estructura GRE 2.0 (`cac:Delivery/cac:Despatch/cac:DespatchAddress`
     anidado, `cbc:AddressTypeCode` con `listID=RUC` para `cod_local`,
     `cac:TransitPeriod/cbc:StartDate`).
-  - Nuevo cliente REST `pe_invoicing.sunat.gre_client`: OAuth2 `password`
+  - Nuevo cliente REST `sunat_py.sunat.gre_client`: OAuth2 `password`
     grant contra `api-seguridad.sunat.gob.pe/v1/clientessol`, POST de envío
     contra `api-cpe.sunat.gob.pe/v1/contribuyente/gem/comprobantes/{filename}`
     (sin `.zip`) y polling de CDR por `numTicket`.
@@ -32,7 +32,7 @@ Cambios relevantes del **SIS Facturador**. Sigue el formato de
 
 - **Notas de crédito (tipo 07)** end-to-end. Anula o ajusta una factura/boleta
   previa con el catálogo de motivos 9 de SUNAT.
-  - SDK `pe-invoicing` 0.2.0: `CreditNoteInput`, `ReferenciaDoc`,
+  - SDK `sunat-py` 0.2.0: `CreditNoteInput`, `ReferenciaDoc`,
     `build_creditnote_xml`, plantilla UBL `creditnote_07.xml.j2` y ejemplo
     standalone `packages/core/examples/emit_creditnote.py`.
   - Servicio: tabla `credit_notes` con FK opcional a `invoices`, schemas
@@ -78,12 +78,12 @@ como "Procesado" en el portal SOL del contribuyente.
 ### Agregado
 
 - API HTTP con `POST /v1/invoices` y `GET /v1/invoices/{id}`.
-- Generación UBL 2.1 con plantilla Jinja2 (`pe_invoicing/ubl/builder.py`), incluyendo
+- Generación UBL 2.1 con plantilla Jinja2 (`sunat_py/ubl/builder.py`), incluyendo
   conversor de números a letras en español y cálculo de IGV al 18%.
-- Firma XMLDSig RSA-SHA256 con Exclusive C14N (`pe_invoicing/signer/xmldsig.py`); el
+- Firma XMLDSig RSA-SHA256 con Exclusive C14N (`sunat_py/signer/xmldsig.py`); el
   elemento `ds:Signature` se reubica dentro de
   `cac:UBLExtensions/cac:UBLExtension/cac:ExtensionContent` como exige SUNAT.
-- Cliente SOAP `sendBill` sobre `zeep` (`pe_invoicing/sunat/client.py`), con WSDLs
+- Cliente SOAP `sendBill` sobre `zeep` (`sunat_py/sunat/client.py`), con WSDLs
   bundleados localmente para beta y prod (evita el rate-limit de SUNAT en
   `?ns1.wsdl`).
 - `tipo_documento` parametrizable en `InvoiceInput` (default `"01"`); permite

@@ -114,10 +114,10 @@ tests. Si toca un endpoint, agrega tests e2e en `tests/e2e/`.
 (Roadmap incluye NC `07`, ND `08`, comunicación de baja, resumen diario.)
 
 Cosas a tocar como mínimo. Importante: separar lo que es lógica del estándar
-SUNAT (va al SDK `pe_invoicing`) de lo que es del servicio HTTP (va a
+SUNAT (va al SDK `sunat_py`) de lo que es del servicio HTTP (va a
 `sis_facturador`).
 
-En el **SDK** (`packages/core/src/pe_invoicing/`):
+En el **SDK** (`packages/core/src/sunat_py/`):
 
 - `ubl/templates/` — plantilla nueva (si la estructura difiere de Invoice
   2.1, ej. CreditNote 2.1)

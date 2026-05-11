@@ -5,7 +5,7 @@ documentos de negocio. SUNAT usa el subset UBL 2.1 con sus propias
 restricciones y extensiones. Este doc cubre los detalles que SUNAT valida
 con dureza — los que si los pifeas, te tira un código de error.
 
-La plantilla está en `pe_invoicing/ubl/templates/invoice_01.xml.j2`. Una sola para
+La plantilla está en `sunat_py/ubl/templates/invoice_01.xml.j2`. Una sola para
 factura (`01`) y boleta (`03`); el `tipo_documento` se interpola en el
 `InvoiceTypeCode`.
 
@@ -71,7 +71,7 @@ El `languageLocaleID="1000"` corresponde al Catálogo 7 código `1000`
 Sin esto, código `2624` o similar.
 
 El builder calcula el monto en letras con `monto_en_letras()` en
-`pe_invoicing/ubl/builder.py` — convierte un Decimal a su representación en español
+`sunat_py/ubl/builder.py` — convierte un Decimal a su representación en español
 peruano ("SON ... CON XX/100 SOLES").
 
 ### `AddressTypeCode` — el infame INFO 4242
@@ -199,7 +199,7 @@ El primero apunta al segundo via el atributo `URI` en
 
 Las notas de crédito (tipo `07`) usan otro UBL: `<CreditNote>` en lugar de
 `<Invoice>`, con su propio namespace y un par de elementos adicionales.
-Plantilla en `pe_invoicing/ubl/templates/creditnote_07.xml.j2`,
+Plantilla en `sunat_py/ubl/templates/creditnote_07.xml.j2`,
 constructor `build_creditnote_xml(inv: CreditNoteInput) -> str`.
 
 Diferencias estructurales respecto a `<Invoice>`:
@@ -248,7 +248,7 @@ La serie sigue el prefijo del comprobante referenciado: NC de factura usa
 
 ## El builder, la decisión clave
 
-`pe_invoicing/ubl/builder.py` tiene dos funciones públicas:
+`sunat_py/ubl/builder.py` tiene dos funciones públicas:
 `build_invoice_xml(inv: InvoiceInput) -> str` y
 `build_creditnote_xml(inv: CreditNoteInput) -> str`. Ambas comparten
 helpers (`_enrich_line`, `compute_totals`, `monto_en_letras`) y solo
@@ -268,6 +268,6 @@ difieren en el template Jinja que cargan. Decisiones explícitas:
 ## Para ver más
 
 - Catálogos de SUNAT: https://cpe.sunat.gob.pe/sites/default/files/inline-files/anexoVIII.pdf
-- Plantilla de factura/boleta: `pe_invoicing/ubl/templates/invoice_01.xml.j2`
-- Plantilla de nota de crédito: `pe_invoicing/ubl/templates/creditnote_07.xml.j2`
+- Plantilla de factura/boleta: `sunat_py/ubl/templates/invoice_01.xml.j2`
+- Plantilla de nota de crédito: `sunat_py/ubl/templates/creditnote_07.xml.j2`
 - Validador online de SUNAT (útil para depurar): https://e-factura.sunat.gob.pe/cl-ti-itcpfegem-beta/billService

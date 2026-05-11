@@ -42,7 +42,7 @@ Variantes del resultado:
 - Si hay error de transporte / autenticación / fault no parseable: lanza un
   `soap:Fault` también pero con un código no numérico (ej. `0102`).
 
-El cliente en `pe_invoicing/sunat/client.py` distingue los tres casos.
+El cliente en `sunat_py/sunat/client.py` distingue los tres casos.
 
 ## El detalle raro: zeep ya decodifica el base64
 
@@ -54,7 +54,7 @@ ZIP).
 
 Caímos al inicio en intentar decodificar otra vez la respuesta como base64
 y eso fallaba con `binascii.Error: Incorrect padding`. La función
-`unpack_cdr()` en `pe_invoicing/sunat/packager.py` detecta el magic `PK` y omite el
+`unpack_cdr()` en `sunat_py/sunat/packager.py` detecta el magic `PK` y omite el
 decode si los bytes ya son ZIP crudos:
 
 ```python
@@ -68,7 +68,7 @@ def unpack_cdr(b64_zip):
 
 ## Los WSDL están bundleados localmente
 
-`pe_invoicing/sunat/wsdl/{beta,prod}/` tiene los WSDLs descargados una sola vez.
+`sunat_py/sunat/wsdl/{beta,prod}/` tiene los WSDLs descargados una sola vez.
 SUNAT publica el WSDL en `https://...billService?wsdl`, que importa otro:
 `?ns1.wsdl`. Ese segundo endpoint **rate-limita**: la primera petición
 responde 200, las siguientes 401. `zeep` durante init hace varias

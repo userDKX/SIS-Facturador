@@ -1,6 +1,6 @@
 # sis-facturador
 
-Microservicio HTTP que envuelve [pe-invoicing](../core) y agrega
+Microservicio HTTP que envuelve [sunat-py](../core) y agrega
 persistencia, storage y deploy en Vercel.
 
 Es un paquete privado del workspace — no se publica a PyPI. La forma de
@@ -25,7 +25,7 @@ correrlo es clonar el repo padre y seguir
 
 ## Por qué está separado del core
 
-El SDK `pe-invoicing` no tiene FastAPI ni SQLAlchemy entre sus
+El SDK `sunat-py` no tiene FastAPI ni SQLAlchemy entre sus
 dependencias — eso lo hace importable desde cualquier app Python (Django,
 Flask, scripts CLI, lambdas) sin arrastrar opinión sobre web framework
 ni ORM. Si necesitas solo la firma, no levantas un servicio.
@@ -42,7 +42,7 @@ src/sis_facturador/
 ├── sunat_runtime.py   caches del SDK (cert, zeep client) leyendo settings
 ├── models/            ORM SQLAlchemy (invoice, credit_note, despatch_advice)
 ├── schemas/           Pydantic v2 (invoice, credit_note, despatch_advice)
-├── services/          orquestación que usa pe_invoicing
+├── services/          orquestación que usa sunat_py
 ├── routers/           endpoints REST (invoices, credit_notes, despatch_advices)
 └── storage/           adaptadores local + Supabase Storage
 ```

@@ -41,6 +41,11 @@ htmlcov/
 # resuelve LOCAL_STORAGE_DIR vacio a una ruta relativa al modulo, no a la raiz.
 packages/api/src/storage/
 
+# XMLs y CDRs de corridas reales contra SUNAT (evidencia local, no ejemplo).
+# Los emit_*.py si quedan: esos son los demos del SDK.
+packages/core/examples/[0-9]*-*.xml
+packages/core/examples/R-[0-9]*-*.xml
+
 # IDE
 .vscode/
 .idea/

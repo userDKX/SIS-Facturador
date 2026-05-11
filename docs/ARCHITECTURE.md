@@ -3,7 +3,7 @@
 Mapa del código del SIS Facturador. El repo es un workspace con dos
 paquetes Python independientes:
 
-- **`pe-invoicing`** (`packages/core/`): SDK con la lógica del estándar
+- **`sunat-py`** (`packages/core/`): SDK con la lógica del estándar
   SUNAT. Sin opinión sobre HTTP ni persistencia. Publicable a PyPI.
 - **`sis-facturador`** (`packages/api/`): microservicio HTTP que envuelve
   el SDK con FastAPI, persistencia y storage. Es lo que se despliega en
@@ -44,9 +44,9 @@ sequenceDiagram
     participant Client as Cliente HTTP
     participant Router as POST /v1/invoices
     participant Service as invoice_service.create_and_send
-    participant Builder as pe_invoicing.ubl.builder
-    participant Signer as pe_invoicing.signer.xmldsig
-    participant Packager as pe_invoicing.sunat.packager
+    participant Builder as sunat_py.ubl.builder
+    participant Signer as sunat_py.signer.xmldsig
+    participant Packager as sunat_py.sunat.packager
     participant SUNAT as SUNAT WS (sendBill)
     participant Storage as Storage (Supabase / local)
     participant DB as Postgres
@@ -77,14 +77,14 @@ La regla operativa: **el SDK no sabe que existe el servicio**. Concretamente:
   cosa del servicio.
 - El SDK no lee env vars directamente: recibe todo por parámetros
   (`pfx_base64`, `mode`, `ruc`, `username`, `password`).
-- El servicio importa el SDK con `from pe_invoicing import ...` o
-  `from pe_invoicing.X import ...` y le pasa los settings que vienen del
+- El servicio importa el SDK con `from sunat_py import ...` o
+  `from sunat_py.X import ...` y le pasa los settings que vienen del
   `.env`.
 
 Así, el SDK es testeable sin levantar nada del servicio, y el servicio
 puede agregar capas (multi-tenant, auth, rate limit) sin tocar el SDK.
 
-## Módulos del SDK (`packages/core/src/pe_invoicing/`)
+## Módulos del SDK (`packages/core/src/sunat_py/`)
 
 ### `ubl/`
 
@@ -211,9 +211,9 @@ tenant) y en middlewares nuevos del servicio. El SDK no se toca.
 ## Decisiones de diseño explícitas
 
 **Workspace con dos paquetes en lugar de uno solo.** El SDK
-`pe-invoicing` puede vivir su vida en PyPI sin arrastrar FastAPI ni
+`sunat-py` puede vivir su vida en PyPI sin arrastrar FastAPI ni
 SQLAlchemy. Un dev que quiera firmar comprobantes desde su propio Django
-o lambda hace `pip install pe-invoicing` y listo, sin tocar el servicio.
+o lambda hace `pip install sunat-py` y listo, sin tocar el servicio.
 
 **Una sola plantilla UBL para factura y boleta.** Considerado dos
 plantillas separadas; rechazado porque la única diferencia real es el

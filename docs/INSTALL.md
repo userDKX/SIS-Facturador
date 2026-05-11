@@ -186,7 +186,7 @@ que no son negociables.
 | `pip install signxml` revienta con error de build de `lxml` (Win) | Instala Visual C++ Build Tools, después `pip install --upgrade pip` y reintenta     |
 | `psycopg.errors.OperationalError` al correr tests                | Tu `DATABASE_URL` apunta a una BD que no existe; créala o usa Supabase              |
 | `cryptography: invalid PKCS12 password`                          | El `CERT_PASSWORD` no coincide. Para MODDATOS es `MODDATOS`                         |
-| `WSDL local no encontrado`                                       | Asegúrate de que clonaste el repo completo (los WSDL están en `packages/core/src/pe_invoicing/sunat/wsdl/`)    |
+| `WSDL local no encontrado`                                       | Asegúrate de que clonaste el repo completo (los WSDL están en `packages/core/src/sunat_py/sunat/wsdl/`)    |
 | `0102 - Usuario o contraseña inválidos` desde beta               | `SUNAT_USER` debe ser `MODDATOS` (sin el RUC adelante — el código lo concatena)     |
 | `0111` desde prod                                                | Espera 24h calendario después de Grabar permisos del secundario en SOL              |
 | Tests skip con "CERT_PFX_BASE64 / CERT_PASSWORD no configurados" | Es esperado para los tests que dependen del cert; configura tu `.env` si los quieres correr |
