@@ -7,9 +7,7 @@ boleta -> B###).
 
 from typing import Literal
 
-CreditReasonCode = Literal[
-    "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "13"
-]
+CreditReasonCode = Literal["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "13"]
 
 ANULACION: CreditReasonCode = "01"
 ANULACION_RUC: CreditReasonCode = "02"

@@ -13,7 +13,6 @@ from sunat_py import (
     validate_ruc,
 )
 
-
 # ---------------------------------------------------------------------------
 # validate_ruc
 # ---------------------------------------------------------------------------
@@ -124,9 +123,7 @@ class TestValidateEmissionDate:
 
     def test_backdate_extendido_por_parametro(self):
         # Para casos de contingencia el llamador puede ampliar el limite.
-        validate_emission_date(
-            today_lima() - timedelta(days=30), max_backdate_days=60
-        )
+        validate_emission_date(today_lima() - timedelta(days=30), max_backdate_days=60)
 
 
 # ---------------------------------------------------------------------------

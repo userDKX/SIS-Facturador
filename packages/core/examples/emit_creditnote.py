@@ -42,7 +42,9 @@ def main() -> int:
     sunat_password = os.environ.get("SUNAT_PASSWORD", "")
 
     if not all([pfx_b64, ruc, sunat_user, sunat_password]):
-        print("Faltan variables de entorno (CERT_PFX_BASE64, SUNAT_RUC, SUNAT_USER, SUNAT_PASSWORD)")
+        print(
+            "Faltan variables de entorno (CERT_PFX_BASE64, SUNAT_RUC, SUNAT_USER, SUNAT_PASSWORD)"
+        )
         return 1
 
     cert = load_cert_from_base64(pfx_b64, pfx_password)

@@ -141,7 +141,9 @@ def create_and_send_despatch_advice(db: Session, payload: DespatchAdviceCreate) 
         llegada_direccion=payload.llegada.direccion,
         llegada_cod_local=payload.llegada.cod_local or None,
         transportista_ruc=payload.transportista.numero_doc if payload.transportista else None,
-        transportista_razon_social=payload.transportista.razon_social if payload.transportista else None,
+        transportista_razon_social=payload.transportista.razon_social
+        if payload.transportista
+        else None,
         conductor_tipo_doc=payload.conductor.tipo_doc if payload.conductor else None,
         conductor_numero_doc=payload.conductor.numero_doc if payload.conductor else None,
         conductor_licencia=payload.conductor.licencia if payload.conductor else None,
@@ -151,9 +153,7 @@ def create_and_send_despatch_advice(db: Session, payload: DespatchAdviceCreate) 
     db.add(gr)
     db.flush()
 
-    filename_base = (
-        f"{settings.SUNAT_RUC}-{_TIPO_DOC_GR}-{payload.serie}-{payload.numero}"
-    )
+    filename_base = f"{settings.SUNAT_RUC}-{_TIPO_DOC_GR}-{payload.serie}-{payload.numero}"
 
     try:
         unsigned_xml = build_despatchadvice_xml(ubl_input)

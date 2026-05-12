@@ -41,9 +41,7 @@ def test_build_debitnote_xml_discrepancy_response_uses_catalog_10(sample_debitno
     xml = build_debitnote_xml(sample_debitnote_input)
     root = etree.fromstring(xml.encode("utf-8"))
 
-    response_code = root.find(
-        f"{{{NS_CAC}}}DiscrepancyResponse/{{{NS_CBC}}}ResponseCode"
-    )
+    response_code = root.find(f"{{{NS_CAC}}}DiscrepancyResponse/{{{NS_CBC}}}ResponseCode")
     assert response_code is not None
     assert response_code.text == "01"
     assert "catalogo10" in response_code.get("listURI")

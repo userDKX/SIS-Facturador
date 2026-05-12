@@ -24,7 +24,7 @@ GRE_API_HOST = "https://api-cpe.sunat.gob.pe"
 
 @dataclass(frozen=True)
 class GreResult:
-    status: str          # "accepted" | "accepted_with_obs" | "rejected" | "error"
+    status: str  # "accepted" | "accepted_with_obs" | "rejected" | "error"
     code: str
     description: str
     cdr_zip: bytes | None = None
@@ -116,8 +116,12 @@ def send_gre(
             return GreResult(status="accepted", code=cod, description="Aceptado", cdr_zip=cdr_zip)
         if cod == "098":
             desc = data.get("desRespuesta", "Aceptado con observaciones")
-            return GreResult(status="accepted_with_obs", code=cod, description=desc, cdr_zip=cdr_zip)
+            return GreResult(
+                status="accepted_with_obs", code=cod, description=desc, cdr_zip=cdr_zip
+            )
         desc = data.get("desRespuesta") or err_msg or "Rechazado"
         return GreResult(status="rejected", code=cod, description=desc, cdr_zip=cdr_zip)
 
-    return GreResult(status="error", code="TIMEOUT", description="Sin respuesta de SUNAT tras reintentos")
+    return GreResult(
+        status="error", code="TIMEOUT", description="Sin respuesta de SUNAT tras reintentos"
+    )

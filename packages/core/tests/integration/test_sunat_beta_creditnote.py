@@ -37,9 +37,7 @@ def test_sendbill_creditnote_against_sunat_beta(sample_creditnote_input, has_bet
     signed = sign_invoice_xml(unsigned, bundle)
 
     ruc = os.environ["SUNAT_RUC"]
-    filename_base = (
-        f"{ruc}-07-{sample_creditnote_input.serie}-{sample_creditnote_input.numero}"
-    )
+    filename_base = f"{ruc}-07-{sample_creditnote_input.serie}-{sample_creditnote_input.numero}"
     zip_bytes = pack_invoice(signed, filename_base)
 
     client = build_zeep_client(

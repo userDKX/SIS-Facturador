@@ -51,12 +51,8 @@ def test_build_creditnote_xml_has_billing_reference(sample_creditnote_input):
     billing = root.find(f"{{{NS_CAC}}}BillingReference")
     assert billing is not None, "BillingReference es obligatorio en CreditNote"
 
-    ref_id = billing.find(
-        f"{{{NS_CAC}}}InvoiceDocumentReference/{{{NS_CBC}}}ID"
-    )
-    doc_type = billing.find(
-        f"{{{NS_CAC}}}InvoiceDocumentReference/{{{NS_CBC}}}DocumentTypeCode"
-    )
+    ref_id = billing.find(f"{{{NS_CAC}}}InvoiceDocumentReference/{{{NS_CBC}}}ID")
+    doc_type = billing.find(f"{{{NS_CAC}}}InvoiceDocumentReference/{{{NS_CBC}}}DocumentTypeCode")
     assert ref_id.text == "F001-1"
     assert doc_type.text == "01"
 

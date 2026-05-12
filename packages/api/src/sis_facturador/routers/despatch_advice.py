@@ -20,8 +20,7 @@ _POST_RESPONSES = {
     },
     409: {
         "description": (
-            "Ya existe una guia de remision con esa combinacion de "
-            "`(ruc_emisor, serie, numero)`."
+            "Ya existe una guia de remision con esa combinacion de `(ruc_emisor, serie, numero)`."
         ),
     },
     422: {
@@ -67,8 +66,7 @@ def post_despatch_advice(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                f"Ya existe una guia de remision con serie={payload.serie} "
-                f"numero={payload.numero}"
+                f"Ya existe una guia de remision con serie={payload.serie} numero={payload.numero}"
             ),
         ) from exc
     except RequestException as exc:

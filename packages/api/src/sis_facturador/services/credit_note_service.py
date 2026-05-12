@@ -129,9 +129,7 @@ def create_and_send_credit_note(db: Session, payload: CreditNoteCreate) -> Credi
     db.add(nc)
     db.flush()
 
-    filename_base = (
-        f"{settings.SUNAT_RUC}-{_TIPO_DOC_NC}-{payload.serie}-{payload.numero}"
-    )
+    filename_base = f"{settings.SUNAT_RUC}-{_TIPO_DOC_NC}-{payload.serie}-{payload.numero}"
 
     try:
         unsigned_xml = build_creditnote_xml(ubl_input)

@@ -155,11 +155,15 @@ def _check_status_once(
     if status_code == "0" and content:
         cdr_xml = unpack_cdr(content)
         code, description = _parse_cdr(cdr_xml)
-        return "done", status_code, SunatResult(
-            status=_classify(code),
-            code=code,
-            description=description,
-            cdr_xml=cdr_xml,
+        return (
+            "done",
+            status_code,
+            SunatResult(
+                status=_classify(code),
+                code=code,
+                description=description,
+                cdr_xml=cdr_xml,
+            ),
         )
 
     if status_code == "99":
@@ -167,19 +171,27 @@ def _check_status_once(
             try:
                 cdr_xml = unpack_cdr(content)
                 code, description = _parse_cdr(cdr_xml)
-                return "done", status_code, SunatResult(
-                    status="rejected",
-                    code=code,
-                    description=description,
-                    cdr_xml=cdr_xml,
+                return (
+                    "done",
+                    status_code,
+                    SunatResult(
+                        status="rejected",
+                        code=code,
+                        description=description,
+                        cdr_xml=cdr_xml,
+                    ),
                 )
             except Exception:
                 pass
-        return "done", status_code, SunatResult(
-            status="rejected",
-            code="99",
-            description="ticket procesado con errores",
-            cdr_xml=b"",
+        return (
+            "done",
+            status_code,
+            SunatResult(
+                status="rejected",
+                code="99",
+                description="ticket procesado con errores",
+                cdr_xml=b"",
+            ),
         )
 
     if status_code == "98":
@@ -248,9 +260,7 @@ async def aget_status(
     de otras requests durante minutos.
     """
     for attempt in range(retries):
-        outcome, status_code, result = await asyncio.to_thread(
-            _check_status_once, client, ticket
-        )
+        outcome, status_code, result = await asyncio.to_thread(_check_status_once, client, ticket)
         if on_attempt is not None:
             on_attempt(attempt, status_code)
         if outcome == "done":

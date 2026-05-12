@@ -97,7 +97,12 @@ _GR_PRIVADO_EXAMPLE = {
     },
     "vehiculo": {"placa": "ABC123"},
     "lines": [
-        {"codigo": "PROD001", "descripcion": "Producto ejemplo", "unidad": "NIU", "cantidad": "5.00"},
+        {
+            "codigo": "PROD001",
+            "descripcion": "Producto ejemplo",
+            "unidad": "NIU",
+            "cantidad": "5.00",
+        },
     ],
 }
 
@@ -120,7 +125,12 @@ _GR_PUBLICO_EXAMPLE = {
     "llegada": {"ubigeo": "150122", "direccion": "AV. LIMA 456, MIRAFLORES"},
     "transportista": {"numero_doc": "20100123456", "razon_social": "TRANSPORTES SAC"},
     "lines": [
-        {"codigo": "PROD001", "descripcion": "Producto ejemplo", "unidad": "NIU", "cantidad": "10.00"},
+        {
+            "codigo": "PROD001",
+            "descripcion": "Producto ejemplo",
+            "unidad": "NIU",
+            "cantidad": "10.00",
+        },
     ],
 }
 
@@ -168,13 +178,9 @@ class DespatchAdviceCreate(BaseModel):
                 "Para modalidad '01' (transporte publico) se requiere 'transportista'."
             )
         if self.modalidad == "02" and not self.conductor:
-            raise ValueError(
-                "Para modalidad '02' (transporte privado) se requiere 'conductor'."
-            )
+            raise ValueError("Para modalidad '02' (transporte privado) se requiere 'conductor'.")
         if self.modalidad == "02" and not self.vehiculo:
-            raise ValueError(
-                "Para modalidad '02' (transporte privado) se requiere 'vehiculo'."
-            )
+            raise ValueError("Para modalidad '02' (transporte privado) se requiere 'vehiculo'.")
         return self
 
 

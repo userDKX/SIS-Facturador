@@ -95,18 +95,18 @@ DESTINATARIO_DIRECCION = "AV. CLIENTE 456 LIMA"
 SERIE = "T001"
 NUMERO = 1
 
-MOTIVO_TRASLADO = "04"          # Catalogo SUNAT 20. 04 = Traslado entre establecimientos
+MOTIVO_TRASLADO = "04"  # Catalogo SUNAT 20. 04 = Traslado entre establecimientos
 MOTIVO_DESCRIPCION = "TRASLADO ENTRE ESTABLECIMIENTOS"
-MODALIDAD = "02"                # Catalogo SUNAT 18. 01 = publico, 02 = privado
+MODALIDAD = "02"  # Catalogo SUNAT 18. 01 = publico, 02 = privado
 
 PESO_BRUTO_TOTAL = Decimal("10.00")
 PESO_BRUTO_UNIDAD = "KGM"
 NUMERO_BULTOS = 1
 
 # Punto de partida
-PARTIDA_UBIGEO = "150101"                  # INEI 6 digitos
+PARTIDA_UBIGEO = "150101"  # INEI 6 digitos
 PARTIDA_DIRECCION = "AV. PRINCIPAL 123 LIMA"
-PARTIDA_COD_LOCAL = "0000"                 # "0000" casa matriz; "0001"+ anexos
+PARTIDA_COD_LOCAL = "0000"  # "0000" casa matriz; "0001"+ anexos
 
 # Punto de llegada
 LLEGADA_UBIGEO = "150101"
@@ -118,7 +118,7 @@ CONDUCTOR_TIPO_DOC = "1"
 CONDUCTOR_NUM_DOC = "00000000"
 CONDUCTOR_NOMBRES = "NOMBRE"
 CONDUCTOR_APELLIDOS = "APELLIDO"
-CONDUCTOR_LICENCIA = "Q00000000"           # licencia vigente del conductor
+CONDUCTOR_LICENCIA = "Q00000000"  # licencia vigente del conductor
 
 # Vehiculo. Placa formato peruano (sin espacios). Ej: "ABC123", "A1B234".
 VEHICULO_PLACA = "ABC123"

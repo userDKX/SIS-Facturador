@@ -56,7 +56,9 @@ def test_build_despatchadvice_xml_has_origin_and_delivery(sample_despatchadvice_
     assert delivery is not None
     assert delivery.find(f"{{{NS_CBC}}}ID").text == "150122"
 
-    despatch = shipment.find(f"{{{NS_CAC}}}Delivery/{{{NS_CAC}}}Despatch/{{{NS_CAC}}}DespatchAddress")
+    despatch = shipment.find(
+        f"{{{NS_CAC}}}Delivery/{{{NS_CAC}}}Despatch/{{{NS_CAC}}}DespatchAddress"
+    )
     assert despatch is not None
     assert despatch.find(f"{{{NS_CBC}}}ID").text == "150101"
     # cod_local del fixture: "0000" - se emite como cbc:AddressTypeCode con listID=RUC.
@@ -82,7 +84,9 @@ def test_build_despatchadvice_xml_private_transport_has_driver_and_vehicle(
     assert driver is not None
     assert driver.find(f"{{{NS_CBC}}}ID").text == "12345678"
 
-    vehicle = shipment.find(f"{{{NS_CAC}}}TransportHandlingUnit/{{{NS_CAC}}}TransportEquipment/{{{NS_CBC}}}ID")
+    vehicle = shipment.find(
+        f"{{{NS_CAC}}}TransportHandlingUnit/{{{NS_CAC}}}TransportEquipment/{{{NS_CBC}}}ID"
+    )
     assert vehicle is not None
     assert vehicle.text == "ABC123"
 
@@ -118,7 +122,9 @@ def test_build_despatchadvice_xml_no_tax_or_monetary_totals(sample_despatchadvic
     root = etree.fromstring(xml.encode("utf-8"))
 
     assert root.find(f"{{{NS_CAC}}}TaxTotal") is None, "GR no debe tener TaxTotal"
-    assert root.find(f"{{{NS_CAC}}}LegalMonetaryTotal") is None, "GR no debe tener LegalMonetaryTotal"
+    assert root.find(f"{{{NS_CAC}}}LegalMonetaryTotal") is None, (
+        "GR no debe tener LegalMonetaryTotal"
+    )
 
 
 def test_build_despatchadvice_xml_leaves_extension_content_empty(sample_despatchadvice_input):

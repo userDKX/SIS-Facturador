@@ -70,8 +70,7 @@ def post_credit_note(payload: CreditNoteCreate, db: Session = Depends(get_db)) -
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                f"Ya existe una nota de credito con serie={payload.serie} "
-                f"numero={payload.numero}"
+                f"Ya existe una nota de credito con serie={payload.serie} numero={payload.numero}"
             ),
         ) from exc
     except SunatError as exc:

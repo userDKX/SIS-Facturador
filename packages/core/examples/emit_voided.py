@@ -45,7 +45,7 @@ from sunat_py import (
 
 # Comprobante a anular
 FECHA_REF = date(2026, 5, 11)  # fecha de emision del CPE original
-ITEM_TIPO = "01"               # "01" factura, "03" boleta — RA no acepta "03"
+ITEM_TIPO = "01"  # "01" factura, "03" boleta — RA no acepta "03"
 ITEM_SERIE = "F001"
 ITEM_NUMERO = 2
 ITEM_MOTIVO = "ERROR EN EMISION"
@@ -63,7 +63,9 @@ def main() -> int:
     mode = os.environ.get("SUNAT_MODE", "prod")
 
     if not all([pfx_b64, ruc, sunat_user, sunat_password]):
-        print("Faltan variables de entorno (CERT_PFX_BASE64, SUNAT_RUC, SUNAT_USER, SUNAT_PASSWORD)")
+        print(
+            "Faltan variables de entorno (CERT_PFX_BASE64, SUNAT_RUC, SUNAT_USER, SUNAT_PASSWORD)"
+        )
         return 1
     if mode not in ("beta", "prod"):
         print(f"SUNAT_MODE debe ser 'beta' o 'prod', recibido: {mode!r}")

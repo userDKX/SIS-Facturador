@@ -75,7 +75,10 @@ def test_get_status_reintenta_98_y_termina_en_0():
     attempts: list[tuple[int, str]] = []
 
     result = get_status(
-        client, "t-98", retries=5, interval=0,
+        client,
+        "t-98",
+        retries=5,
+        interval=0,
         on_attempt=lambda i, s: attempts.append((i, s)),
     )
 
@@ -124,7 +127,10 @@ def test_aget_status_funciona_y_no_bloquea():
 
     result = asyncio.run(
         aget_status(
-            client, "t-async", retries=5, interval=0,
+            client,
+            "t-async",
+            retries=5,
+            interval=0,
             on_attempt=lambda i, s: attempts.append((i, s)),
         )
     )

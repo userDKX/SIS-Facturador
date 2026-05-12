@@ -29,15 +29,12 @@ def validate_emission_date(fecha: date, *, max_backdate_days: int = _MAX_BACKDAT
         contingencia.
     """
     if not isinstance(fecha, date):
-        raise ValidationError(
-            f"fecha_emision debe ser date, recibido {type(fecha).__name__}"
-        )
+        raise ValidationError(f"fecha_emision debe ser date, recibido {type(fecha).__name__}")
 
     hoy = today_lima()
     if fecha > hoy:
         raise ValidationError(
-            f"fecha_emision {fecha.isoformat()} es futura "
-            f"(hoy en Lima: {hoy.isoformat()})"
+            f"fecha_emision {fecha.isoformat()} es futura (hoy en Lima: {hoy.isoformat()})"
         )
 
     delta = (hoy - fecha).days

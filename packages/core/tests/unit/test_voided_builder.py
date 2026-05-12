@@ -46,10 +46,7 @@ def test_build_voided_xml_id_y_fechas(sample_voided_input):
         root.find(f"{{{NS_CBC}}}ReferenceDate").text
         == sample_voided_input.fecha_referencia.isoformat()
     )
-    assert (
-        root.find(f"{{{NS_CBC}}}IssueDate").text
-        == sample_voided_input.fecha_emision.isoformat()
-    )
+    assert root.find(f"{{{NS_CBC}}}IssueDate").text == sample_voided_input.fecha_emision.isoformat()
 
 
 def test_build_voided_xml_tiene_voided_line(sample_voided_input):

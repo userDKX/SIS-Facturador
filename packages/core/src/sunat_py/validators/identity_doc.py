@@ -30,9 +30,7 @@ def validate_identity_doc(tipo_doc: str, numero_doc: str) -> None:
 
     if tipo_doc == "1":
         if len(numero_doc) != 8 or not numero_doc.isdigit():
-            raise ValidationError(
-                f"DNI debe ser 8 digitos numericos, recibido {numero_doc!r}"
-            )
+            raise ValidationError(f"DNI debe ser 8 digitos numericos, recibido {numero_doc!r}")
         return
 
     if tipo_doc == "4":

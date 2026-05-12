@@ -74,9 +74,7 @@ def test_build_summary_xml_linea_boleta(sample_summary_input):
     cliente_id = line.find(
         f"{{{NS_CAC}}}AccountingCustomerParty/{{{NS_CBC}}}CustomerAssignedAccountID"
     )
-    cliente_tipo = line.find(
-        f"{{{NS_CAC}}}AccountingCustomerParty/{{{NS_CBC}}}AdditionalAccountID"
-    )
+    cliente_tipo = line.find(f"{{{NS_CAC}}}AccountingCustomerParty/{{{NS_CBC}}}AdditionalAccountID")
     assert cliente_id.text == "12345678"
     assert cliente_tipo.text == "1"
 

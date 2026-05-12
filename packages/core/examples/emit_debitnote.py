@@ -36,7 +36,7 @@ from sunat_py import (
 )
 
 # Documento original que esta ND modifica
-DOC_TIPO = "01"   # "01" factura, "03" boleta
+DOC_TIPO = "01"  # "01" factura, "03" boleta
 DOC_SERIE = "F001"
 DOC_NUMERO = 1
 
@@ -54,7 +54,9 @@ def main() -> int:
     mode = os.environ.get("SUNAT_MODE", "prod")
 
     if not all([pfx_b64, ruc, sunat_user, sunat_password]):
-        print("Faltan variables de entorno (CERT_PFX_BASE64, SUNAT_RUC, SUNAT_USER, SUNAT_PASSWORD)")
+        print(
+            "Faltan variables de entorno (CERT_PFX_BASE64, SUNAT_RUC, SUNAT_USER, SUNAT_PASSWORD)"
+        )
         return 1
     if mode not in ("beta", "prod"):
         print(f"SUNAT_MODE debe ser 'beta' o 'prod', recibido: {mode!r}")
@@ -82,7 +84,7 @@ def main() -> int:
         numero=ND_NUMERO,
         fecha_emision=today_lima(),
         moneda="PEN",
-        motivo_codigo="01",                       # cat. 10: 01=intereses por mora
+        motivo_codigo="01",  # cat. 10: 01=intereses por mora
         motivo_descripcion="INTERES POR MORA",
         referencia=ReferenciaDoc(tipo_doc=DOC_TIPO, serie=DOC_SERIE, numero=DOC_NUMERO),
         emisor=emisor,

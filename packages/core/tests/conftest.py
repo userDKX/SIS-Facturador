@@ -268,9 +268,7 @@ def sample_despatchadvice_input():
         peso_bruto_unidad="KGM",
         emisor=emisor,
         destinatario=destinatario,
-        partida=DireccionTraslado(
-            ubigeo="150101", direccion="AV TEST 123 LIMA", cod_local="0000"
-        ),
+        partida=DireccionTraslado(ubigeo="150101", direccion="AV TEST 123 LIMA", cod_local="0000"),
         llegada=DireccionTraslado(ubigeo="150122", direccion="AV CLIENTE 456"),
         lines=lines,
         numero_bultos=2,
