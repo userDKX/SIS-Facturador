@@ -9,6 +9,7 @@ from sis_facturador import __version__
 from sis_facturador.routers import credit_notes as credit_notes_router
 from sis_facturador.routers import despatch_advice as despatch_advice_router
 from sis_facturador.routers import invoices as invoices_router
+from sis_facturador.routers import perceptions as perceptions_router
 from sis_facturador.routers import retentions as retentions_router
 from sis_facturador.sunat_runtime import get_cert
 
@@ -64,6 +65,16 @@ TAGS_METADATA = [
             "POST `/v1/retentions` referencia las facturas pagadas y declara "
             "el monto retenido por pago. Solo agentes designados por SUNAT pueden "
             "emitir este tipo."
+        ),
+    },
+    {
+        "name": "perceptions",
+        "description": (
+            "Emisión y consulta de comprobantes de percepción del IGV (tipo 40). "
+            "POST `/v1/perceptions` referencia las facturas cobradas y declara "
+            "el monto percibido por cobro. A diferencia de retención, percepción "
+            "SUMA al cliente. Solo agentes designados por SUNAT pueden emitir "
+            "este tipo."
         ),
     },
 ]
@@ -173,4 +184,10 @@ app.include_router(
     retentions_router.router,
     prefix="/v1/retentions",
     tags=["retentions"],
+)
+
+app.include_router(
+    perceptions_router.router,
+    prefix="/v1/perceptions",
+    tags=["perceptions"],
 )

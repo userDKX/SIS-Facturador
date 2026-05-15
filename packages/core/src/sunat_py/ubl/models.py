@@ -10,6 +10,7 @@ from sunat_py.catalogs import (
     DebitReasonCode,
     IdentityDocCode,
     IgvAffectationCode,
+    PerceptionRegimeCode,
     RetentionRegimeCode,
     TransportModalityCode,
     TransportReasonCode,
@@ -380,3 +381,75 @@ class RetentionInput:
     nota: str | None = None
     moneda: Literal["PEN"] = "PEN"
     tipo_documento: Literal["20"] = "20"
+
+
+# ---------------------------------------------------------------------------
+# Comprobante de Percepcion (tipo 40) — UBL 2.0 + extensiones SUNAT
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class PerceptionDocReference:
+    """Factura o boleta sobre la que se aplica la percepcion.
+
+    Cada item es un cobro al cliente, no una factura completa: si una
+    factura se cobra en varios pagos, va como varios items con distinto
+    `correlativo_pago`.
+
+    tipo_doc: catalogo 01 — SUNAT acepta "01" factura, "03" boleta, "07"
+        nota de credito, "08" nota de debito, "12" ticket. Para percepcion
+        del IGV regimen general lo tipico es "01" o "03".
+    moneda: la de la factura original. El comprobante de percepcion
+        siempre se emite en PEN.
+    tipo_cambio: requerido si `moneda != PEN`.
+    """
+
+    serie: str
+    numero: int
+    fecha_emision: date
+    moneda: str
+    total: Decimal
+    fecha_pago: date
+    importe_sin_percepcion: Decimal
+    importe_percepcion: Decimal
+    fecha_percepcion: date
+    importe_total_cobrado: Decimal
+    tipo_cambio: Decimal | None = None
+    tipo_cambio_fecha: date | None = None
+    correlativo_pago: int = 1
+    tipo_doc: Literal["01", "03", "07", "08", "12"] = "01"
+
+
+@dataclass(frozen=True)
+class PerceptionInput:
+    """Comprobante de percepcion del IGV (tipo 40).
+
+    Solo agentes de percepcion designados por SUNAT pueden emitir este
+    documento. Ver padron en
+    <http://www.sunat.gob.pe/padronesnotificaciones/>.
+
+    serie: alfanumerica de 4 caracteres empezando con `P` (ej. "P001").
+    regimen: catalogo SUNAT 22 — "01" combustible (1%), "02" venta interna
+        (2%), "03" importacion.
+    tasa: porcentaje declarado en el comprobante (la suele exigir SUNAT
+        que coincida con el regimen, pero el SDK no la valida — el agente
+        de percepcion la declara).
+    total_percibido: suma de `items[i].importe_percepcion`, en PEN.
+    total_cobrado: suma de `items[i].importe_total_cobrado`, en PEN. Es
+        lo que efectivamente cobro el agente al cliente (incluyendo la
+        percepcion).
+    """
+
+    serie: str
+    numero: int
+    fecha_emision: date
+    emisor: Party
+    receptor: Party
+    regimen: PerceptionRegimeCode
+    tasa: Decimal
+    total_percibido: Decimal
+    total_cobrado: Decimal
+    items: list[PerceptionDocReference]
+    nota: str | None = None
+    moneda: Literal["PEN"] = "PEN"
+    tipo_documento: Literal["40"] = "40"

@@ -272,6 +272,53 @@ def sample_retention_input():
 
 
 @pytest.fixture
+def sample_perception_input():
+    """PerceptionInput valido para tests unit — cobro de S/1180 con percepcion del 2%."""
+    from sunat_py import Party
+    from sunat_py.ubl.models import PerceptionDocReference, PerceptionInput
+
+    emisor = Party(
+        tipo_doc="6",
+        numero_doc="20000000001",
+        razon_social="AGENTE PERCEPCION SAC",
+        direccion="AV TEST 123 LIMA",
+        ubigeo="150101",
+    )
+    receptor = Party(
+        tipo_doc="6",
+        numero_doc="20100070970",
+        razon_social="CLIENTE SAC",
+        direccion="AV CLIENTE 456",
+    )
+    items = [
+        PerceptionDocReference(
+            serie="F001",
+            numero=1,
+            fecha_emision=today_lima(),
+            moneda="PEN",
+            total=Decimal("1180.00"),
+            fecha_pago=today_lima(),
+            importe_sin_percepcion=Decimal("1180.00"),
+            importe_percepcion=Decimal("23.60"),
+            fecha_percepcion=today_lima(),
+            importe_total_cobrado=Decimal("1203.60"),
+        ),
+    ]
+    return PerceptionInput(
+        serie="P001",
+        numero=1,
+        fecha_emision=today_lima(),
+        emisor=emisor,
+        receptor=receptor,
+        regimen="02",
+        tasa=Decimal("2.00"),
+        total_percibido=Decimal("23.60"),
+        total_cobrado=Decimal("1203.60"),
+        items=items,
+    )
+
+
+@pytest.fixture
 def sample_despatchadvice_input():
     """DespatchAdviceInput valido para tests unit — modalidad privada (no toca SUNAT)."""
     from sunat_py import (

@@ -13,6 +13,7 @@ from sunat_py.ubl.models import (
     InvoiceInput,
     InvoiceLine,
     InvoiceTotals,
+    PerceptionInput,
     RetentionInput,
     SummaryDocumentsInput,
     VoidedDocumentsInput,
@@ -22,6 +23,7 @@ from sunat_py.validators import (
     validate_emission_date,
     validate_identity_doc,
     validate_lines,
+    validate_perception,
     validate_retention,
 )
 
@@ -462,6 +464,61 @@ def build_retention_xml(inv: RetentionInput) -> str:
         tasa=_q(inv.tasa),
         total_retenido=_q(inv.total_retenido),
         total_pagado=_q(inv.total_pagado),
+    )
+    etree.fromstring(rendered.encode("utf-8"))
+    return rendered
+
+
+def _enrich_perception_item(item) -> dict:
+    """Pre-formatea fechas y montos para la plantilla perception_40."""
+    return {
+        "tipo_doc": item.tipo_doc,
+        "serie": item.serie,
+        "numero": item.numero,
+        "fecha_emision": item.fecha_emision.isoformat(),
+        "moneda": item.moneda,
+        "total": _q(item.total),
+        "fecha_pago": item.fecha_pago.isoformat(),
+        "importe_sin_percepcion": _q(item.importe_sin_percepcion),
+        "importe_percepcion": _q(item.importe_percepcion),
+        "fecha_percepcion": item.fecha_percepcion.isoformat(),
+        "importe_total_cobrado": _q(item.importe_total_cobrado),
+        "correlativo_pago": item.correlativo_pago,
+        "tipo_cambio": _q(item.tipo_cambio) if item.tipo_cambio is not None else None,
+        "tipo_cambio_fecha": (
+            item.tipo_cambio_fecha.isoformat() if item.tipo_cambio_fecha else None
+        ),
+    }
+
+
+def build_perception_xml(inv: PerceptionInput) -> str:
+    """Renderiza un comprobante de percepcion (tipo 40) UBL sin firmar.
+
+    Estructura UBL especifica de SUNAT (namespace `sunat:Perception-1`,
+    base UBL 2.0):
+      * Espejo de retencion con diferencias clave:
+        - Tags `sac:SUNATPerceptionSystemCode`, `SUNATPerceptionPercent`.
+        - `sac:SUNATTotalCashed` (cobrado) vs `SUNATTotalPaid` (pagado).
+        - `sac:SUNATPerceptionDocumentReference` por cada cobro percibido.
+      * Aritmetica inversa a retencion: el agente de percepcion COBRA
+        mas que el importe original (suma) en lugar de retener.
+
+    El elemento <ext:ExtensionContent/> queda vacio para que el signer
+    inserte ahi la firma XMLDSig.
+    """
+    validate_emisor(inv.emisor)
+    validate_identity_doc(inv.receptor.tipo_doc, inv.receptor.numero_doc)
+    validate_emission_date(inv.fecha_emision)
+    validate_perception(inv)
+
+    template = _env.get_template("perception_40.xml.j2")
+    items = [_enrich_perception_item(it) for it in inv.items]
+    rendered = template.render(
+        inv=inv,
+        items=items,
+        tasa=_q(inv.tasa),
+        total_percibido=_q(inv.total_percibido),
+        total_cobrado=_q(inv.total_cobrado),
     )
     etree.fromstring(rendered.encode("utf-8"))
     return rendered
