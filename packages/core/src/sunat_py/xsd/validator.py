@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 from lxml import etree
@@ -72,7 +72,7 @@ class XSDValidationError(ValidationError):
         super().__init__(summary)
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_schema(filename: str) -> etree.XMLSchema:
     """Carga y cachea un XMLSchema desde `schemas/`.
 
