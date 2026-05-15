@@ -30,6 +30,20 @@ NS_CBC = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
 SunatMode = Literal["beta", "prod"]
 SunatStatus = Literal["accepted", "accepted_with_obs", "rejected"]
 
+# SUNAT separa los CPE en dos endpoints SOAP distintos:
+#   "bill"     -> ol-ti-itcpfegem/billService             (factura, boleta,
+#                                                          NC, ND, RA, RC)
+#   "otroscpe" -> ol-ti-itemision-otroscpe-gem/billService (retencion,
+#                                                          percepcion)
+# Mismo WSDL en operaciones; cambia solo el endpoint. Mandar tipo 20/40 al
+# servicio "bill" devuelve error 0151 ("no es un cpe valido").
+SunatService = Literal["bill", "otroscpe"]
+
+_WSDL_FILENAMES: dict[SunatService, str] = {
+    "bill": "billService.wsdl",
+    "otroscpe": "billService_otroscpe.wsdl",
+}
+
 
 @dataclass(frozen=True)
 class SunatResult:
@@ -54,17 +68,27 @@ def build_zeep_client(
     username: str,
     password: str,
     timeout: int = 120,
+    service: SunatService = "bill",
 ) -> Client:
     """Construye un cliente zeep contra el WSDL local de SUNAT.
 
     `username` es el user del secundario sin el RUC. Internamente se
     concatena `{ruc}{username}` para WS-Security UsernameToken.
 
+    `service` selecciona el endpoint SOAP:
+      * "bill" (default) -> factura, boleta, NC, ND, RA, RC.
+      * "otroscpe"       -> retencion (20), percepcion (40).
+
+    Ambos servicios exponen las mismas operaciones (sendBill, sendSummary,
+    getStatus, getStatusAR). Para emitir RET/PER hay que construir un
+    cliente con `service="otroscpe"`; mandar tipo 20/40 al servicio "bill"
+    devuelve error 0151.
+
     Usa WSDLs bundleados localmente en `wsdl/{beta,prod}/` porque SUNAT
     rate-limita el endpoint del import `?ns1.wsdl`: la primera fetch
     responde 200, las siguientes 401, y zeep hace varias durante init.
     """
-    wsdl_path = WSDL_DIR / mode / "billService.wsdl"
+    wsdl_path = WSDL_DIR / mode / _WSDL_FILENAMES[service]
     if not wsdl_path.exists():
         raise RuntimeError(f"WSDL local no encontrado: {wsdl_path}")
 
@@ -102,12 +126,24 @@ def _classify(code: str) -> SunatStatus:
 def _extract_fault_code(fault: ZeepFault) -> str:
     """Extrae el codigo numerico de un SOAP Fault de SUNAT.
 
-    SUNAT envia faults con codigo tipo `soap-env:Client.0306` donde 0306
-    es el codigo SUNAT del error. Devuelve el sufijo numerico si existe.
+    SUNAT manda faults de dos formas dependiendo del servicio y la version:
+      * `soap-env:Client.0306` -> codigo embebido en el faultcode (billService
+        clasico, factura/boleta).
+      * `soap-env:Client` + faultstring `"2603"` -> codigo en el message,
+        no en el code (observado en otroscpe / retencion-percepcion).
+
+    Devuelve el sufijo numerico si lo encuentra en cualquiera de los dos
+    lugares; si no, devuelve el raw del faultcode.
     """
     raw = str(fault.code) if fault.code else ""
     if "." in raw:
-        return raw.rsplit(".", 1)[-1]
+        suffix = raw.rsplit(".", 1)[-1]
+        if suffix.isdigit():
+            return suffix
+    if fault.message:
+        msg = str(fault.message).strip()
+        if msg.isdigit():
+            return msg
     return raw
 
 

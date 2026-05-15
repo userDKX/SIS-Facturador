@@ -27,10 +27,31 @@ def get_cert() -> CertBundle:
 
 @lru_cache(maxsize=1)
 def get_sunat_client() -> Client:
-    """Devuelve el cliente zeep cacheado contra SUNAT (beta o prod segun MODE)."""
+    """Cliente zeep contra el billService de SUNAT (factura/boleta/NC/ND/RA/RC).
+
+    Endpoint: `ol-ti-itcpfegem/billService`.
+    """
     return build_zeep_client(
         mode=settings.MODE,
         ruc=settings.SUNAT_RUC,
         username=settings.SUNAT_USER,
         password=settings.SUNAT_PASSWORD,
+        service="bill",
+    )
+
+
+@lru_cache(maxsize=1)
+def get_sunat_client_otroscpe() -> Client:
+    """Cliente zeep contra el servicio de otros CPE (retencion / percepcion).
+
+    Endpoint: `ol-ti-itemision-otroscpe-gem/billService`. SUNAT separa
+    estos tipos del billService principal; mandar tipo 20/40 al cliente
+    base devuelve error 0151.
+    """
+    return build_zeep_client(
+        mode=settings.MODE,
+        ruc=settings.SUNAT_RUC,
+        username=settings.SUNAT_USER,
+        password=settings.SUNAT_PASSWORD,
+        service="otroscpe",
     )
