@@ -14,7 +14,7 @@ devuelve un ticket que se consulta después con `getStatus`).
 WS-Security con `UsernameToken`:
 
 - `Username` = `{RUC}{usuario_secundario}` concatenado, por ejemplo
-  `20495184120FACSIS11`. (El código arma esto solo en
+  `20XXXXXXXXXFACSIS11`. (El código arma esto solo en
   `settings.sunat_username` — tú pones `SUNAT_USER=FACSIS11` en `.env` y se
   prefija el RUC.)
 - `Password` = clave del secundario, en plaintext (en el SOAP, sobre TLS).
@@ -26,7 +26,7 @@ WS-Security con `UsernameToken`:
 ```python
 client = Client(wsdl="...", wsse=UsernameToken(user, pwd))
 response_b64 = client.service.sendBill(
-    fileName="20495184120-01-F001-1.zip",
+    fileName="20XXXXXXXXX-01-F001-1.zip",
     contentFile=zip_bytes,           # bytes crudos del ZIP
 )
 # response_b64 son bytes ZIP del CDR (zeep ya decodifica xsd:base64Binary)

@@ -68,8 +68,8 @@ def main() -> int:
     emisor = Party(
         tipo_doc="6",
         numero_doc=ruc,
-        razon_social="TRANSP M & L EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA",
-        direccion="CAL.ICA MZA. A LOTE. 8 ICA - NASCA - VISTA ALEGRE",
+        razon_social="MI EMPRESA SAC",
+        direccion="AV PRINCIPAL 123 LIMA",
         ubigeo="150101",
     )
 
@@ -86,7 +86,7 @@ def main() -> int:
                 serie="B001",
                 numero=3,
                 cliente_tipo_doc="1",
-                cliente_numero_doc="61624121",
+                cliente_numero_doc="12345678",
                 moneda="PEN",
                 total=Decimal("3.00"),
                 base_gravada=Decimal("2.54"),

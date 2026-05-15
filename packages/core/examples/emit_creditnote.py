@@ -58,14 +58,14 @@ def main() -> int:
     emisor = Party(
         tipo_doc="6",
         numero_doc=ruc,
-        razon_social="TRANSP M & L EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA",
-        direccion="CAL.ICA MZA. A LOTE. 8 ICA - NASCA - VISTA ALEGRE",
+        razon_social="MI EMPRESA SAC",
+        direccion="AV PRINCIPAL 123 LIMA",
         ubigeo="150101",
     )
     receptor = Party(
         tipo_doc="6",
         numero_doc=ruc,
-        razon_social="TRANSP M & L EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA",
+        razon_social="MI EMPRESA SAC",
         direccion="",
     )
 

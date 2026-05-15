@@ -143,7 +143,7 @@ class CreditNoteResponse(BaseModel):
             "example": {
                 "id": 1,
                 "invoice_id": 5,
-                "ruc_emisor": "20495184120",
+                "ruc_emisor": "20XXXXXXXXX",
                 "tipo_doc": "07",
                 "serie": "FC01",
                 "numero": 1,
@@ -160,8 +160,8 @@ class CreditNoteResponse(BaseModel):
                 "status": "accepted",
                 "sunat_code": "0",
                 "sunat_description": "La Nota de Credito numero FC01-1, ha sido aceptada",
-                "xml_signed_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/xml/20495184120-07-FC01-1.xml",
-                "cdr_xml_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/cdr/R-20495184120-07-FC01-1.xml",
+                "xml_signed_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/xml/20XXXXXXXXX-07-FC01-1.xml",
+                "cdr_xml_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/cdr/R-20XXXXXXXXX-07-FC01-1.xml",
                 "error_message": None,
             }
         },

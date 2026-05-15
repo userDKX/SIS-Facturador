@@ -27,7 +27,7 @@ Cinco comprobantes nuevos aceptados por SUNAT prod con `code=0`:
 | RC | `RC-20260511-1` | accepted | `202620699620214` |
 | RA | `RA-20260511-1` | accepted | `202620699633180` |
 
-CDR de cada uno en `examples/R-20495184120-*.xml` para referencia.
+CDR de cada uno en `examples/R-20XXXXXXXXX-*.xml` para referencia.
 
 ### Agregado
 
@@ -105,7 +105,7 @@ CDR de cada uno en `examples/R-20495184120-*.xml` para referencia.
 ## [0.1.0] - 2026-05-08 (interno, no publicado)
 
 Primer pipeline funcional end-to-end. Boleta `B001-1` y factura `F001-1`
-aceptadas con code 0 en SUNAT prod (RUC `20495184120`). Vivio como
+aceptadas con code 0 en SUNAT prod (RUC `20XXXXXXXXX`). Vivio como
 `pe-invoicing 0.1.0`.
 
 ### Incluido

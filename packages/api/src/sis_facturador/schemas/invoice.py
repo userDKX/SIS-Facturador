@@ -134,7 +134,7 @@ class InvoiceResponse(BaseModel):
         json_schema_extra={
             "example": {
                 "id": 1,
-                "ruc_emisor": "20495184120",
+                "ruc_emisor": "20XXXXXXXXX",
                 "tipo_doc": "01",
                 "serie": "F001",
                 "numero": 123,
@@ -146,8 +146,8 @@ class InvoiceResponse(BaseModel):
                 "status": "accepted",
                 "sunat_code": "0",
                 "sunat_description": "La Factura numero F001-123, ha sido aceptada",
-                "xml_signed_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/xml/20495184120-01-F001-123.xml",
-                "cdr_xml_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/cdr/R-20495184120-01-F001-123.xml",
+                "xml_signed_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/xml/20XXXXXXXXX-01-F001-123.xml",
+                "cdr_xml_url": "https://xxx.supabase.co/storage/v1/object/public/comprobantes/cdr/R-20XXXXXXXXX-01-F001-123.xml",
                 "error_message": None,
             }
         },

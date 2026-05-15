@@ -97,7 +97,7 @@ WS equivocado (mandando creds de prod a beta o viceversa).
 Fix:
 
 1. Revisa que `SUNAT_USER` no tenga el RUC adelante. Es solo el username
-   del secundario (ej. `FACSIS11`, no `20495184120FACSIS11`). El código
+   del secundario (ej. `FACSIS11`, no `20XXXXXXXXXFACSIS11`). El código
    prefija el RUC al armar el UsernameToken.
 2. Revisa `MODE` — credenciales de beta no funcionan en prod.
 3. Para beta con MODDATOS: `SUNAT_USER=MODDATOS`, `SUNAT_PASSWORD=MODDATOS`.
@@ -122,8 +122,8 @@ probabilidad:
    - `Certificado Digital`.
    - `Consultar Envíos de CPE`.
 3. **Username del secundario contiene partes del nombre comercial.** Por
-   ejemplo, si tu razón social es "TRANSP M & L EIRL" y creaste el
-   secundario como `TRANSPSIS` o `MYLEIRL`, SUNAT lo bloquea. Crea uno
+   ejemplo, si tu razón social es "MI EMPRESA EIRL" y creaste el
+   secundario como `MIEMPSIS` o `MIEMPEIRL`, SUNAT lo bloquea. Crea uno
    nuevo con username alfanumérico neutro.
 4. **El RUC no está en el padrón de Emisores Electrónicos.** Verifica:
    https://ww1.sunat.gob.pe/ol-ti-itobligado-consulta/padronObligadosCPE
@@ -204,8 +204,8 @@ Fix: el formato exacto es `{RUC}-{tipo}-{serie}-{numero}.zip`, conteniendo
 `{RUC}-{tipo}-{serie}-{numero}.xml`. Por ejemplo:
 
 ```
-20495184120-01-F001-1.zip
-└── 20495184120-01-F001-1.xml
+20XXXXXXXXX-01-F001-1.zip
+└── 20XXXXXXXXX-01-F001-1.xml
 ```
 
 Si modificaste la lógica de naming en los scripts o el service, este es el

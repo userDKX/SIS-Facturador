@@ -63,8 +63,8 @@ secundario dedicado.
 
 Sobre el username del secundario hay una restricción rara y poco
 documentada: **no puede contener partes del nombre comercial ni palabras del
-razón social**. Si tu razón social tiene "TRANSP M & L EIRL", usernames como
-`TRANSPSIS` o `MYLEIRL` van a ser rechazados. Algo alfanumérico y neutro
+razón social**. Si tu razón social tiene "MI EMPRESA EIRL", usernames como
+`MIEMPSIS` o `MIEMPEIRL` van a ser rechazados. Algo alfanumérico y neutro
 funciona — por ejemplo `FACSIS11`, `WSFAC01`, etc.
 
 Si SUNAT te rechaza el username sin explicación clara, casi seguro es por

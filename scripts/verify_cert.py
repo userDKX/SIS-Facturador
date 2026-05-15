@@ -83,8 +83,8 @@ def main() -> int:
     print("\n[3/5] Construyendo UBL 2.1 de muestra (sin enviar a SUNAT)...")
     emisor = Party(
         tipo_doc="6",
-        numero_doc="20495184120",
-        razon_social="TRANSP M & L EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA",
+        numero_doc="20XXXXXXXXX",
+        razon_social="MI EMPRESA SAC",
         direccion="DIRECCION DE PRUEBA LOCAL",
         ubigeo="150101",
     )
