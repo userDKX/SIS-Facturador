@@ -9,6 +9,7 @@ from sis_facturador import __version__
 from sis_facturador.routers import credit_notes as credit_notes_router
 from sis_facturador.routers import despatch_advice as despatch_advice_router
 from sis_facturador.routers import invoices as invoices_router
+from sis_facturador.routers import retentions as retentions_router
 from sis_facturador.sunat_runtime import get_cert
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,15 @@ TAGS_METADATA = [
             "Emisión y consulta de guías de remisión remitente (tipo 09). "
             "POST `/v1/despatch-advices` genera el UBL DespatchAdvice con datos "
             "de traslado, transportista/conductor y vehículo."
+        ),
+    },
+    {
+        "name": "retentions",
+        "description": (
+            "Emisión y consulta de comprobantes de retención del IGV (tipo 20). "
+            "POST `/v1/retentions` referencia las facturas pagadas y declara "
+            "el monto retenido por pago. Solo agentes designados por SUNAT pueden "
+            "emitir este tipo."
         ),
     },
 ]
@@ -157,4 +167,10 @@ app.include_router(
     despatch_advice_router.router,
     prefix="/v1/despatch-advices",
     tags=["despatch-advices"],
+)
+
+app.include_router(
+    retentions_router.router,
+    prefix="/v1/retentions",
+    tags=["retentions"],
 )

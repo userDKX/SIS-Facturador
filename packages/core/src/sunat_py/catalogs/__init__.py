@@ -33,6 +33,10 @@ from sunat_py.catalogs.igv_affectation import (
     IGV_AFFECTATION_LABELS,
     IgvAffectationCode,
 )
+from sunat_py.catalogs.retention_regime import (
+    RETENTION_REGIME_LABELS,
+    RetentionRegimeCode,
+)
 from sunat_py.catalogs.transport_modality import (
     TRANSPORT_MODALITY_LABELS,
     TransportModalityCode,
@@ -48,6 +52,7 @@ __all__ = [
     "DOCUMENT_TYPE_LABELS",
     "IDENTITY_DOC_LABELS",
     "IGV_AFFECTATION_LABELS",
+    "RETENTION_REGIME_LABELS",
     "TRANSPORT_MODALITY_LABELS",
     "TRANSPORT_REASON_LABELS",
     "CreditReasonCode",
@@ -55,6 +60,7 @@ __all__ = [
     "DocumentTypeCode",
     "IdentityDocCode",
     "IgvAffectationCode",
+    "RetentionRegimeCode",
     "TransportModalityCode",
     "TransportReasonCode",
 ]

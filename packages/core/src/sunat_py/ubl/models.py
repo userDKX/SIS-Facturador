@@ -10,6 +10,7 @@ from sunat_py.catalogs import (
     DebitReasonCode,
     IdentityDocCode,
     IgvAffectationCode,
+    RetentionRegimeCode,
     TransportModalityCode,
     TransportReasonCode,
 )
@@ -310,3 +311,72 @@ class DespatchAdviceInput:
     # Fecha de inicio del traslado (cac:Delivery/cac:Despatch/cbc:ActualDespatchDate).
     # Obligatoria para SUNAT — si no se pasa, se usa fecha_emision.
     fecha_inicio_traslado: date | None = None
+
+
+# ---------------------------------------------------------------------------
+# Comprobante de Retencion (tipo 20) — UBL 2.0 + extensiones SUNAT
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class RetentionDocReference:
+    """Factura sobre la que se aplica la retencion del IGV.
+
+    Cada item es un pago a un proveedor, no una factura completa: si una
+    factura tiene varios pagos parciales, se modela como varios items
+    apuntando al mismo `(serie, numero)` con `correlativo_pago` distinto.
+
+    tipo_doc: SUNAT solo admite "01" (factura) para retencion del IGV.
+    moneda: la de la factura original (PEN, USD, etc.). El comprobante
+        de retencion en si siempre se emite en PEN.
+    tipo_cambio: requerido si `moneda != PEN` — convierte el monto pagado
+        a PEN para calcular la retencion. Sin esto SUNAT rechaza con
+        error 2799.
+    """
+
+    serie: str
+    numero: int
+    fecha_emision: date
+    moneda: str
+    total: Decimal
+    fecha_pago: date
+    importe_sin_retencion: Decimal
+    importe_retencion: Decimal
+    fecha_retencion: date
+    importe_neto_pagado: Decimal
+    tipo_cambio: Decimal | None = None
+    tipo_cambio_fecha: date | None = None
+    correlativo_pago: int = 1
+    tipo_doc: Literal["01"] = "01"
+
+
+@dataclass(frozen=True)
+class RetentionInput:
+    """Comprobante de retencion del IGV (tipo 20).
+
+    Solo agentes de retencion designados por SUNAT pueden emitir este
+    documento. Ver padron en
+    <http://www.sunat.gob.pe/padronesnotificaciones/>.
+
+    serie: alfanumerica de 4 caracteres empezando con `R` (ej. "R001").
+    regimen: catalogo SUNAT 23 — siempre "01".
+    tasa: porcentaje del regimen (3.00 desde 01/03/2014, 6.00 historico).
+    total_retenido: suma de `items[i].importe_retencion`, en PEN.
+    total_pagado: suma de `items[i].importe_neto_pagado`, en PEN. Es lo
+        que efectivamente recibio el proveedor despues de aplicar la
+        retencion.
+    """
+
+    serie: str
+    numero: int
+    fecha_emision: date
+    emisor: Party
+    receptor: Party
+    regimen: RetentionRegimeCode
+    tasa: Decimal
+    total_retenido: Decimal
+    total_pagado: Decimal
+    items: list[RetentionDocReference]
+    nota: str | None = None
+    moneda: Literal["PEN"] = "PEN"
+    tipo_documento: Literal["20"] = "20"

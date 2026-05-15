@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Retention xmlns="urn:sunat:names:specification:ubl:peru:schema:xsd:Retention-1"
+           xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+           xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+           xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+           xmlns:sac="urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1"
+           xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent/>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.0</cbc:UBLVersionID>
+  <cbc:CustomizationID>1.0</cbc:CustomizationID>
+  <cac:Signature>
+    <cbc:ID>{{ inv.emisor.numero_doc }}</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID>{{ inv.emisor.numero_doc }}</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>{{ inv.emisor.razon_social }}</cbc:Name>
+      </cac:PartyName>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#SignatureSP</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cbc:ID>{{ inv.serie }}-{{ inv.numero }}</cbc:ID>
+  <cbc:IssueDate>{{ inv.fecha_emision.isoformat() }}</cbc:IssueDate>
+  <cac:AgentParty>
+    <cac:PartyIdentification>
+      <cbc:ID schemeID="{{ inv.emisor.tipo_doc }}">{{ inv.emisor.numero_doc }}</cbc:ID>
+    </cac:PartyIdentification>
+    <cac:PartyName>
+      <cbc:Name>{{ inv.emisor.razon_social }}</cbc:Name>
+    </cac:PartyName>
+    <cac:PostalAddress>
+      <cbc:StreetName>{{ inv.emisor.direccion }}</cbc:StreetName>
+      <cac:Country>
+        <cbc:IdentificationCode>PE</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
+    <cac:PartyLegalEntity>
+      <cbc:RegistrationName>{{ inv.emisor.razon_social }}</cbc:RegistrationName>
+    </cac:PartyLegalEntity>
+  </cac:AgentParty>
+  <cac:ReceiverParty>
+    <cac:PartyIdentification>
+      <cbc:ID schemeID="{{ inv.receptor.tipo_doc }}">{{ inv.receptor.numero_doc }}</cbc:ID>
+    </cac:PartyIdentification>
+    <cac:PartyName>
+      <cbc:Name>{{ inv.receptor.razon_social }}</cbc:Name>
+    </cac:PartyName>
+    {% if inv.receptor.direccion %}
+    <cac:PostalAddress>
+      <cbc:StreetName>{{ inv.receptor.direccion }}</cbc:StreetName>
+      <cac:Country>
+        <cbc:IdentificationCode>PE</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
+    {% endif %}
+    <cac:PartyLegalEntity>
+      <cbc:RegistrationName>{{ inv.receptor.razon_social }}</cbc:RegistrationName>
+    </cac:PartyLegalEntity>
+  </cac:ReceiverParty>
+  <sac:SUNATRetentionSystemCode>{{ inv.regimen }}</sac:SUNATRetentionSystemCode>
+  <sac:SUNATRetentionPercent>{{ tasa }}</sac:SUNATRetentionPercent>
+  {% if inv.nota %}
+  <cbc:Note>{{ inv.nota }}</cbc:Note>
+  {% endif %}
+  <cbc:TotalInvoiceAmount currencyID="{{ inv.moneda }}">{{ total_retenido }}</cbc:TotalInvoiceAmount>
+  <sac:SUNATTotalPaid currencyID="{{ inv.moneda }}">{{ total_pagado }}</sac:SUNATTotalPaid>
+  {% for item in items %}
+  <sac:SUNATRetentionDocumentReference>
+    <cbc:ID schemeID="{{ item.tipo_doc }}">{{ item.serie }}-{{ item.numero }}</cbc:ID>
+    <cbc:IssueDate>{{ item.fecha_emision }}</cbc:IssueDate>
+    <cbc:TotalInvoiceAmount currencyID="{{ item.moneda }}">{{ item.total }}</cbc:TotalInvoiceAmount>
+    <cac:Payment>
+      <cbc:ID>{{ item.correlativo_pago }}</cbc:ID>
+      <cbc:PaidAmount currencyID="{{ item.moneda }}">{{ item.importe_sin_retencion }}</cbc:PaidAmount>
+      <cbc:PaidDate>{{ item.fecha_pago }}</cbc:PaidDate>
+    </cac:Payment>
+    <sac:SUNATRetentionInformation>
+      <sac:SUNATRetentionAmount currencyID="PEN">{{ item.importe_retencion }}</sac:SUNATRetentionAmount>
+      <sac:SUNATRetentionDate>{{ item.fecha_retencion }}</sac:SUNATRetentionDate>
+      <sac:SUNATNetTotalPaid currencyID="PEN">{{ item.importe_neto_pagado }}</sac:SUNATNetTotalPaid>
+      {% if item.tipo_cambio %}
+      <cac:ExchangeRate>
+        <cbc:SourceCurrencyCode>{{ item.moneda }}</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>PEN</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>{{ item.tipo_cambio }}</cbc:CalculationRate>
+        <cbc:Date>{{ item.tipo_cambio_fecha }}</cbc:Date>
+      </cac:ExchangeRate>
+      {% endif %}
+    </sac:SUNATRetentionInformation>
+  </sac:SUNATRetentionDocumentReference>
+  {% endfor %}
+</Retention>

@@ -13,6 +13,7 @@ from sunat_py.ubl.models import (
     InvoiceInput,
     InvoiceLine,
     InvoiceTotals,
+    RetentionInput,
     SummaryDocumentsInput,
     VoidedDocumentsInput,
 )
@@ -21,6 +22,7 @@ from sunat_py.validators import (
     validate_emission_date,
     validate_identity_doc,
     validate_lines,
+    validate_retention,
 )
 
 IGV_RATE = Decimal("0.18")
@@ -398,6 +400,69 @@ def build_summary_xml(inv: SummaryDocumentsInput) -> str:
     template = _env.get_template("summary_RC.xml.j2")
     items = [_enrich_summary_item(it) for it in inv.items]
     rendered = template.render(inv=inv, items=items)
+    etree.fromstring(rendered.encode("utf-8"))
+    return rendered
+
+
+def _enrich_retention_item(item) -> dict:
+    """Pre-formatea fechas y montos para la plantilla retention_20.
+
+    Pre-cuantiza montos a 2 decimales (lo que SUNAT espera en el XML) y
+    serializa las fechas a ISO; la plantilla queda libre de logica.
+    """
+    payload = {
+        "tipo_doc": item.tipo_doc,
+        "serie": item.serie,
+        "numero": item.numero,
+        "fecha_emision": item.fecha_emision.isoformat(),
+        "moneda": item.moneda,
+        "total": _q(item.total),
+        "fecha_pago": item.fecha_pago.isoformat(),
+        "importe_sin_retencion": _q(item.importe_sin_retencion),
+        "importe_retencion": _q(item.importe_retencion),
+        "fecha_retencion": item.fecha_retencion.isoformat(),
+        "importe_neto_pagado": _q(item.importe_neto_pagado),
+        "correlativo_pago": item.correlativo_pago,
+        "tipo_cambio": _q(item.tipo_cambio) if item.tipo_cambio is not None else None,
+        "tipo_cambio_fecha": (
+            item.tipo_cambio_fecha.isoformat() if item.tipo_cambio_fecha else None
+        ),
+    }
+    return payload
+
+
+def build_retention_xml(inv: RetentionInput) -> str:
+    """Renderiza un comprobante de retencion (tipo 20) UBL sin firmar.
+
+    Estructura UBL especifica de SUNAT (namespace `sunat:Retention-1`,
+    base UBL 2.0):
+      * Sin LegalMonetaryTotal — el monto total retenido va directo en
+        <cbc:TotalInvoiceAmount> del Retention.
+      * <cac:AgentParty> = agente de retencion (RUC propio del emisor).
+      * <cac:ReceiverParty> = proveedor retenido (puede ser RUC o DNI).
+      * <sac:SUNATRetentionSystemCode> y <sac:SUNATRetentionPercent>:
+        regimen y tasa.
+      * <sac:SUNATRetentionDocumentReference> por cada pago retenido
+        (puede haber varios contra la misma factura si hay pagos
+        parciales).
+
+    El elemento <ext:ExtensionContent/> queda vacio para que el signer
+    inserte ahi la firma XMLDSig.
+    """
+    validate_emisor(inv.emisor)
+    validate_identity_doc(inv.receptor.tipo_doc, inv.receptor.numero_doc)
+    validate_emission_date(inv.fecha_emision)
+    validate_retention(inv)
+
+    template = _env.get_template("retention_20.xml.j2")
+    items = [_enrich_retention_item(it) for it in inv.items]
+    rendered = template.render(
+        inv=inv,
+        items=items,
+        tasa=_q(inv.tasa),
+        total_retenido=_q(inv.total_retenido),
+        total_pagado=_q(inv.total_pagado),
+    )
     etree.fromstring(rendered.encode("utf-8"))
     return rendered
 

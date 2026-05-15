@@ -30,6 +30,7 @@ from sunat_py.ubl.builder import (
     build_debitnote_xml,
     build_despatchadvice_xml,
     build_invoice_xml,
+    build_retention_xml,
     build_summary_xml,
     build_voided_xml,
     compute_totals,
@@ -47,6 +48,8 @@ from sunat_py.ubl.models import (
     InvoiceTotals,
     Party,
     ReferenciaDoc,
+    RetentionDocReference,
+    RetentionInput,
     SummaryDocumentsInput,
     SummaryItem,
     Transportista,
@@ -60,6 +63,7 @@ from sunat_py.validators import (
     validate_emission_date,
     validate_identity_doc,
     validate_lines,
+    validate_retention,
     validate_ruc,
 )
 
@@ -79,6 +83,8 @@ __all__ = [
     "InvoiceTotals",
     "Party",
     "ReferenciaDoc",
+    "RetentionDocReference",
+    "RetentionInput",
     "SummaryDocumentsInput",
     "SummaryItem",
     "SunatError",
@@ -96,6 +102,7 @@ __all__ = [
     "build_debitnote_xml",
     "build_despatchadvice_xml",
     "build_invoice_xml",
+    "build_retention_xml",
     "build_summary_xml",
     "build_voided_xml",
     "build_zeep_client",
@@ -117,5 +124,6 @@ __all__ = [
     "validate_emission_date",
     "validate_identity_doc",
     "validate_lines",
+    "validate_retention",
     "validate_ruc",
 ]

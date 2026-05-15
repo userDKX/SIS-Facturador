@@ -225,6 +225,53 @@ def sample_summary_input():
 
 
 @pytest.fixture
+def sample_retention_input():
+    """RetentionInput valido para tests unit — pago de S/1180 con retencion del 3%."""
+    from sunat_py import Party
+    from sunat_py.ubl.models import RetentionDocReference, RetentionInput
+
+    emisor = Party(
+        tipo_doc="6",
+        numero_doc="20000000001",
+        razon_social="AGENTE RETENCION SAC",
+        direccion="AV TEST 123 LIMA",
+        ubigeo="150101",
+    )
+    receptor = Party(
+        tipo_doc="6",
+        numero_doc="20100070970",
+        razon_social="PROVEEDOR SAC",
+        direccion="AV PROVEEDOR 456",
+    )
+    items = [
+        RetentionDocReference(
+            serie="F001",
+            numero=1,
+            fecha_emision=today_lima(),
+            moneda="PEN",
+            total=Decimal("1180.00"),
+            fecha_pago=today_lima(),
+            importe_sin_retencion=Decimal("1180.00"),
+            importe_retencion=Decimal("35.40"),
+            fecha_retencion=today_lima(),
+            importe_neto_pagado=Decimal("1144.60"),
+        ),
+    ]
+    return RetentionInput(
+        serie="R001",
+        numero=1,
+        fecha_emision=today_lima(),
+        emisor=emisor,
+        receptor=receptor,
+        regimen="01",
+        tasa=Decimal("3.00"),
+        total_retenido=Decimal("35.40"),
+        total_pagado=Decimal("1144.60"),
+        items=items,
+    )
+
+
+@pytest.fixture
 def sample_despatchadvice_input():
     """DespatchAdviceInput valido para tests unit — modalidad privada (no toca SUNAT)."""
     from sunat_py import (
