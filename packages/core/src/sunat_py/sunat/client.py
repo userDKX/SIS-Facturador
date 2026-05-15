@@ -70,7 +70,9 @@ def build_zeep_client(
 
     wsse = UsernameToken(f"{ruc}{username}", password)
     transport = Transport(timeout=timeout, operation_timeout=timeout)
-    zeep_settings = ZeepSettings(strict=False, xml_huge_tree=True)
+    # strict=True valida la respuesta contra el WSDL; sin xml_huge_tree
+    # cerramos la puerta a Billion Laughs / entity bombs en el CDR.
+    zeep_settings = ZeepSettings(strict=True)
     return Client(
         wsdl=str(wsdl_path),
         wsse=wsse,
