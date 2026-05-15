@@ -22,8 +22,10 @@ dist/
 build/
 *.egg-info/
 
-# Tests
+# Tests / lint caches
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .coverage
 htmlcov/
 
