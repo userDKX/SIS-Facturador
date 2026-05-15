@@ -42,6 +42,19 @@ def get_gre_token(
 
     username: usuario SOL sin RUC (solo el sufijo, ej. "FACSIS11").
     Internamente se concatena como {ruc}{username}.
+
+    Trato de secretos en el caller:
+      - El body de este POST viaja como x-www-form-urlencoded con
+        `client_secret` y `password` en cleartext. Sobre TLS es seguro en
+        el wire, pero `urllib3.connectionpool` y `requests` los loggean
+        completos cuando alguien activa `logging.basicConfig(level=DEBUG)`
+        o setea el logger de urllib3 en DEBUG. No habilitar DEBUG de
+        urllib3 en produccion.
+      - El token retornado autoriza envios GRE en nombre del RUC durante
+        su TTL. Tratar como secret: no persistir sin cifrar, no loggear,
+        no exponer en respuestas HTTP del caller.
+      - Para mitigar leaks por DEBUG en dev, ver
+        `sunat_py.security.install_log_redactor()` (opt-in).
     """
     url = f"https://api-seguridad.sunat.gob.pe/v1/clientessol/{client_id}/oauth2/token/"
     resp = requests.post(
@@ -71,7 +84,14 @@ def send_gre(
 ) -> GreResult:
     """Envia la GRE firmada y espera el resultado del CDR.
 
-    filename_base: nombre sin extension, ej. "20495184120-09-T001-1".
+    filename_base: nombre sin extension, ej. "20XXXXXXXXX-09-T001-1".
+
+    El header `Authorization: Bearer {token}` queda en el dict de headers
+    durante toda la vida de la funcion (envio + polling). Hooks de
+    observabilidad (Sentry breadcrumbs, `logfire`, etc.) que capturen
+    requests/responses se pueden llevar el token en cleartext. Mismo
+    consejo que en `get_gre_token`: no habilitar DEBUG de urllib3 en prod
+    y/o instalar `sunat_py.security.install_log_redactor()`.
     """
     zip_name = f"{filename_base}.zip"
     arc_b64 = base64.b64encode(zip_bytes).decode("utf-8")

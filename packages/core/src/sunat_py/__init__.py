@@ -10,6 +10,7 @@ from sunat_py.security.cert_loader import (
     load_cert_from_base64,
     load_cert_from_pfx,
 )
+from sunat_py.security.log_redactor import install_log_redactor
 from sunat_py.signer.xmldsig import sign_invoice_xml
 from sunat_py.sunat.client import (
     SunatError,
@@ -101,6 +102,7 @@ __all__ = [
     "compute_totals",
     "get_gre_token",
     "get_status",
+    "install_log_redactor",
     "load_cert_from_base64",
     "load_cert_from_pfx",
     "monto_en_letras",
