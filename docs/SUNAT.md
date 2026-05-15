@@ -75,8 +75,8 @@ responde 200, las siguientes 401. `zeep` durante init hace varias
 peticiones al WSDL completo, por lo que después del primer cliente fallan
 todos los siguientes.
 
-La solución estándar (la usa Greenter, la usa cualquier proyecto serio): se
-descarga el WSDL una vez, se descargan los archivos referenciados
+La solución estándar (la usa Greenter también): se descarga el WSDL una
+vez, se descargan los archivos referenciados
 (`?ns1.wsdl`, `?xsd2.xsd`), se patchean las refs internas para apuntar a
 los archivos locales (`billService_ns1.wsdl`, `billService_xsd2.xsd`), y se
 guarda todo en disco. `client.py` carga desde local según `settings.MODE`.
@@ -211,8 +211,7 @@ fuera del alcance del SIS Facturador en su release actual.
 
 El Sistema Integrado de Registros Electrónicos (SIRE) reemplaza los
 registros físicos de ventas y compras. Lo lleva el contribuyente o su
-contador, no este facturador, pero conviene mencionarlo a clientes para
-que estén al tanto.
+contador, no este facturador, pero los clientes deberían estar al tanto.
 
 ## Catálogos vigentes
 

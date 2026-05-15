@@ -3,7 +3,7 @@
 Documentación del **SIS Facturador**, una API en Python para emitir
 comprobantes electrónicos a SUNAT (Perú). Está pensada para tres tipos de
 lectores: el que necesita usarlo (operador), el que quiere evaluarlo
-(reviewer / recruiter), y el que quiere extenderlo (contribuidor).
+antes de adoptarlo (reviewer), y el que quiere extenderlo (contribuidor).
 
 ## Por dónde empezar
 
@@ -13,6 +13,7 @@ lectores: el que necesita usarlo (operador), el que quiere evaluarlo
 | Habilitar un RUC real en producción (crear secundario, permisos…)    | [`SUNAT_SETUP.md`](./SUNAT_SETUP.md)        |
 | Entender la forma del código                                         | [`ARCHITECTURE.md`](./ARCHITECTURE.md)      |
 | Diagnosticar un código de error de SUNAT (`0111`, `2800`, `3244`…)   | [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md)|
+| Validar un tipo nuevo en los 3 niveles (local → beta → prod)         | [`VALIDACION_RET_PER.md`](./VALIDACION_RET_PER.md) |
 
 ## Lado técnico
 

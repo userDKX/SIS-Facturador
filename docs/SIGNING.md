@@ -1,8 +1,8 @@
 # Firma del comprobante (XMLDSig)
 
-Este es el lado del proyecto que más cuesta entender bien y donde más cosas
-sutiles te pueden tirar el envío con un error que no dice nada útil. Vale la
-pena leerlo entero antes de tocar `sunat_py/signer/xmldsig.py`.
+La firma XMLDSig es la parte del flujo donde más detalles sutiles tumban un
+envío con errores poco claros. Leer este doc completo antes de tocar
+`sunat_py/signer/xmldsig.py`.
 
 ## Contexto: XMLDSig vs XAdES-BES
 

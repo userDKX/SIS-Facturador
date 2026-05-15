@@ -224,15 +224,15 @@ Tener marcado SEE-SOL no te habilita el WS, y al revés tampoco. Si tu
 secundario solo tiene permisos de SEE-SOL, vas a llegar al `0111` aunque te
 parezca que "tiene permisos de Factura Electrónica".
 
-## Marco normativo que conviene tener en mente (2024-2026)
+## Marco normativo aplicable (2024-2026)
 
 - **RS 075-2026/SUNAT** (vigente 2026-06-01): contribuyentes nuevos quedan
   emisores electrónicos automáticos desde la inscripción del RUC. Para
   contribuyentes ya inscritos antes, no cambia nada.
 - **RS 062-2026/SUNAT**: proyecto público con cambios adicionales a
-  designación de emisores. Vale la pena seguirlo.
+  designación de emisores. En watching, no aprobado al cierre de este doc.
 - **RS 240-2024 + RS 133-2025**: solo aplican a Guía de Remisión
   Electrónica, que es otro WSDL distinto.
 - **SIRE obligatorio en paralelo**: registro de ventas/compras electrónico,
-  lo lleva el contribuyente (o su contador), no este facturador. Vale
-  mencionarlo a clientes para que sepan que existe.
+  lo lleva el contribuyente (o su contador), no este facturador. Los
+  clientes deberían saber que existe.

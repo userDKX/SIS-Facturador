@@ -211,7 +211,7 @@ rc = SummaryDocumentsInput(
 )
 ```
 
-**Reglas SUNAT que vale la pena saber**:
+**Reglas SUNAT a tener presentes**:
 
 - Un RA solo agrupa CPE emitidos en la **misma fecha** (`fecha_referencia`).
   Si querés anular CPE de varios días, mandá un RA por día.
@@ -289,7 +289,7 @@ print(result.status, result.code, result.description)
 > *Empresas > Comprobantes de Pago > SEE > Credenciales API SUNAT*. Son
 independientes del usuario SOL del SEE-DSC.
 
-**Reglas SUNAT que vale la pena saber**:
+**Reglas SUNAT a tener presentes**:
 
 - `cod_local` (catálogo SUNAT establecimientos anexos) es obligatorio para
   el punto de partida cuando el motivo es `04` (traslado entre

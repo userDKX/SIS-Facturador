@@ -29,6 +29,31 @@ Este repo es la implementación nativa en Python del flujo entero: firma con
 Pydantic v2. No envuelve a Greenter ni porta su código — implementa el
 estándar de SUNAT directo.
 
+## Cómo está partido
+
+Es un monorepo con dos piezas que pueden usarse por separado:
+
+### `sunat-py` — el SDK
+
+[![PyPI](https://img.shields.io/pypi/v/sunat-py.svg)](https://pypi.org/project/sunat-py/)
+
+Builders UBL 2.1, firma XMLDSig, clientes SOAP (factura/boleta/NC/ND,
+baja, resumen) y REST (GRE remitente). Sin FastAPI, sin BD — solo la
+lógica de emisión. Vive en `packages/core/`.
+
+```
+pip install sunat-py
+```
+
+Útil si ya tienes tu propio backend (Django, Flask, scripts batch,
+notebooks) y solo necesitas la parte de SUNAT.
+
+### `sis-facturador` — el microservicio
+
+API FastAPI con endpoints REST, Postgres, storage de los CDRs aceptados
+y orquestación del envío. Usa `sunat-py` por dentro como dependencia.
+Vive en `packages/api/`. Cómo correrlo está más abajo.
+
 ## Lo que ya funciona en producción
 
 El 2026-05-08 se mandaron a `e-factura.sunat.gob.pe`:
@@ -205,11 +230,6 @@ migrations/                     SQL plano para Supabase
 docs/                           documentación
 examples/                       payloads y curl listos para usar
 ```
-
-**El SDK** (`packages/core`) no toca FastAPI ni la BD — es una librería pura
-que cualquier dev Python puede `pip install sunat-py` y usar desde su
-propia app. **El microservicio** (`packages/api`) es un wrapper delgado
-encima del SDK: agrega HTTP, persistencia, storage y deploy.
 
 ## Contribuir
 

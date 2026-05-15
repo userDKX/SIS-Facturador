@@ -1,8 +1,7 @@
 # Deploy single-tenant en Vercel
 
-Esta es la forma simple, gratuita y operativa para un cliente individual:
-1 deploy en Vercel + 1 proyecto en Supabase. Es lo que está implementado
-y validado en producción real.
+Modo single-tenant: 1 deploy en Vercel + 1 proyecto en Supabase, un cliente
+por instancia. Es lo implementado y validado en producción real.
 
 Si necesitas servir a varios RUCs desde una sola instancia, no es esto —
 léete [`DEPLOY_PROVIDER.md`](./DEPLOY_PROVIDER.md).
@@ -172,7 +171,7 @@ miles de comprobantes.
 
 ## Limitaciones del modelo single-tenant
 
-Cosas que el modelo actual **no** hace y conviene tener claras:
+Lo que el modelo actual **no** hace:
 
 - **No hay autenticación en la API.** Cualquiera con la URL puede emitir
   comprobantes. Asume que la URL solo la conoce el cliente del facturador
