@@ -8,7 +8,7 @@ etc. El caller pasa los bytes ya leidos.
 from __future__ import annotations
 
 import base64
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
@@ -19,10 +19,14 @@ from cryptography.x509.oid import NameOID
 
 @dataclass(frozen=True)
 class CertBundle:
-    private_key: RSAPrivateKey
+    # `private_key` y `key_pem` se omiten del repr porque la PEM es PKCS8 sin
+    # encriptar: un `print(bundle)` o `logger.info("%s", bundle)` filtraria la
+    # clave del contribuyente. Para identificar el bundle en logs usar las
+    # properties `common_name` y `serial_hex`.
+    private_key: RSAPrivateKey = field(repr=False)
     certificate: Certificate
     cert_pem: bytes
-    key_pem: bytes
+    key_pem: bytes = field(repr=False)
 
     @property
     def common_name(self) -> str:
