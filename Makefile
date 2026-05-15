@@ -1,4 +1,4 @@
-.PHONY: help install install-dev lint fmt test test-beta cov run verify-cert sendbill-beta sendbill-prod sendbill-prod-boleta clean precommit-install precommit-run
+.PHONY: help install install-dev lint fmt test test-beta cov run verify-cert sendbill-beta sendbill-prod sendbill-prod-boleta clean precommit-install precommit-run refresh-xsd
 
 # Default target
 help:
@@ -25,6 +25,9 @@ help:
 	@echo "  sendbill-beta      Homologacion: manda Factura a SUNAT beta"
 	@echo "  sendbill-prod      PRODUCCION: emite Factura real (--confirm-real)"
 	@echo "  sendbill-prod-boleta PRODUCCION: emite Boleta real (--confirm-real)"
+	@echo ""
+	@echo "Mantenimiento del SDK"
+	@echo "  refresh-xsd        Refresca el bundle de XSDs OASIS UBL 2.1 (SUNAT manual)"
 	@echo ""
 	@echo "Misc"
 	@echo "  clean              Limpia caches, coverage, build artifacts"
@@ -79,3 +82,6 @@ clean:
 	@python -c "import shutil, pathlib; [shutil.rmtree(p, ignore_errors=True) for p in ['htmlcov', '.pytest_cache', '.mypy_cache', '.ruff_cache', '.coverage', 'build', 'dist']]"
 	@python -c "import shutil, pathlib; [shutil.rmtree(p, ignore_errors=True) for p in pathlib.Path('.').rglob('*.egg-info')]"
 	@echo "Limpio: caches y build artifacts."
+
+refresh-xsd:
+	python scripts/refresh_xsd_schemas.py
