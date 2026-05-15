@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sunat-py"
-version = "0.3.0"
-description = "Comprobantes electrónicos SUNAT (Perú) desde Python: factura, boleta, NC, ND, GRE remitente, comunicación de baja y resumen diario. UBL 2.1, XMLDSig, SOAP y REST. En desarrollo activo."
+version = "0.5.0"
+description = "Comprobantes electrónicos SUNAT (Perú) desde Python: factura, boleta, NC, ND, GRE remitente, comunicación de baja, resumen diario, retención y percepción. UBL 2.1 + 2.0, XMLDSig, SOAP y REST. Validación XSD client-side."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -17,6 +17,7 @@ keywords = [
     "sunat-peru",
     "electronic-invoicing",
     "ubl-2.1",
+    "ubl-2.0",
     "xmldsig",
     "peru",
     "factura-electronica",
@@ -27,6 +28,8 @@ keywords = [
     "resumen-diario",
     "guia-remision",
     "gre",
+    "retencion",
+    "percepcion",
     "validator",
     "sdk",
 ]
