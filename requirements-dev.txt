@@ -1,9 +1,9 @@
 # Dev tooling. Para correrlo y poder testear / lintear.
 -r requirements.txt
 
-pytest>=8.3,<9
-pytest-cov>=5.0
-ruff>=0.8
-mypy>=1.13
-pre-commit>=4.0
-types-lxml>=2024.12
+pytest>=9.0.3,<10
+pytest-cov>=7.1.0
+ruff>=0.15.13
+mypy>=2.1.0
+pre-commit>=4.6.0
+types-lxml>=2026.2.16
